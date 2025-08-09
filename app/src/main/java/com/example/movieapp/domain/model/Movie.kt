@@ -1,0 +1,60 @@
+package com.example.movieapp.domain.model
+
+data class Movie(
+    val kinopoiskId: Int? = null,
+    val nameRu: String? = null,
+    val nameOriginal: String? = null,
+    val posterUrl: String? = null,
+    val posterUrlPreview: String? = null,
+    val coverUrl: String? = null,
+    val logoUrl: String? = null,
+    val reviewsCount: Int? = null,
+    val ratingGoodReview: Double? = null,
+    val ratingGoodReviewVoteCount: Int? = null,
+    val ratingKinopoisk: Double? = null,
+    val ratingKinopoiskVoteCount: Int? = null,
+    val ratingImdb: Double? = null,
+    val ratingImdbVoteCount: Int? = null,
+    val ratingFilmCritics: Double? = null,
+    val ratingFilmCriticsVoteCount: Int? = null,
+    val ratingAwait: String? = null,
+    val ratingAwaitCount: Int? = null,
+    val ratingRfCritics: Double? = null,
+    val ratingRfCriticsVoteCount: Int? = null,
+    val year: Int? = null,
+    val filmLength: Int? = null,
+    val slogan: String? = null,
+    val description: String? = null,
+    val shortDescription: String? = null,
+    val editorAnnotation: String? = null,
+    val isTicketsAvailable: Boolean? = null,
+    val productionStatus: ProductionStatus? = null,
+    val type: Type? = null,
+    val ratingMpaa: String? = null,
+    val ratingAgeLimits: String? = null,
+    val countries: List<String>? = null,
+    val genres: List<String>? = null,
+    val startYear: String? = null,
+    val endYear: String? = null,
+    val serial: Boolean? = null,
+    val shortFilm: Boolean? = null,
+    val completed: Boolean? = null,
+)
+
+enum class ProductionStatus {
+    FILMING,
+    PRE_PRODUCTION,
+    COMPLETED,
+    ANNOUNCED,
+    UNKNOWN,
+    POST_PRODUCTION
+}
+
+
+enum class Type {
+    FILM,
+    VIDEO,
+    TV_SERIES,
+    MINI_SERIES,
+    TV_SHOW
+}
