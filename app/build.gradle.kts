@@ -73,6 +73,9 @@ ktlint {
 }
 
 dependencies {
+    implementation(project(":presentation"))
+    implementation(project(":domain"))
+    implementation(project(":data"))
     implementation(libs.coil.compose)
     implementation(libs.logging.interceptor)
     implementation(libs.retrofit)
