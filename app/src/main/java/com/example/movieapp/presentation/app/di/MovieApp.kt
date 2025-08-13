@@ -1,13 +1,13 @@
-package com.example.movieapp.app.di
+package com.example.movieapp.presentation.app.di
 
 import android.app.Application
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 
-class MovieApp: Application() {
+class MovieApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        startKoin{
+        startKoin {
             androidContext(this@MovieApp)
             modules(mainModule)
         }

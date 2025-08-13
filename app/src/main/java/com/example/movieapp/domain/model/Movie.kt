@@ -34,8 +34,8 @@ data class Movie(
     val ratingAgeLimits: String? = null,
     val countries: List<String>? = null,
     val genres: List<String>? = null,
-    val startYear: String? = null,
-    val endYear: String? = null,
+    val startYear: Int? = null,
+    val endYear: Int? = null,
     val serial: Boolean? = null,
     val shortFilm: Boolean? = null,
     val completed: Boolean? = null,
@@ -47,14 +47,13 @@ enum class ProductionStatus {
     COMPLETED,
     ANNOUNCED,
     UNKNOWN,
-    POST_PRODUCTION
+    POST_PRODUCTION,
 }
-
 
 enum class Type {
     FILM,
     VIDEO,
     TV_SERIES,
     MINI_SERIES,
-    TV_SHOW
+    TV_SHOW,
 }

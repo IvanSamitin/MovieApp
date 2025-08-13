@@ -1,4 +1,4 @@
-package com.example.movieapp.presentation.uiComponents
+package com.example.movieapp.presentation.ui.uiComponents
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,18 +21,18 @@ fun <T> PullToRefreshLazyColumn(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
-    lazyListState: LazyListState = rememberLazyListState()
+    lazyListState: LazyListState = rememberLazyListState(),
 ) {
     PullToRefreshBox(
         modifier = modifier,
         isRefreshing = isRefreshing,
-        onRefresh = onRefresh
+        onRefresh = onRefresh,
     ) {
         LazyColumn(
             state = lazyListState,
             contentPadding = PaddingValues(8.dp),
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(items) {
                 content(it)

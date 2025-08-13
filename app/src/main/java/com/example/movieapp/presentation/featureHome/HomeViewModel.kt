@@ -1,7 +1,8 @@
-package com.example.movieapp.presentation.featureMovieDetail
+package com.example.movieapp.presentation.featureHome
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.domain.repository.MovieRepository
 import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
@@ -11,35 +12,33 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class MovieDetailsViewModel(
+class HomeViewModel(
     private val movieRepository: MovieRepository,
-    private val movieId: Int,
 ) : ViewModel() {
+
     private var hasLoadedInitialData = false
 
-    private val _state = MutableStateFlow(MovieDetailsState())
-    val state =
-        _state
-            .onStart {
-                if (!hasLoadedInitialData) {
-                    getMovieDetails(movieId)
-                    hasLoadedInitialData = true
-                }
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000L),
-                initialValue = MovieDetailsState(),
-            )
-
-    fun onAction(action: MovieDetailsAction) {
-        when (action) {
-            is MovieDetailsAction.Update -> getMovieDetails(movieId)
+    private val _state = MutableStateFlow(HomeState())
+    val state = _state
+        .onStart {
+            if (!hasLoadedInitialData) {
+                getCollection(movieCategory = MovieCategory.TOP_POPULAR_ALL)
+                getCollection(movieCategory = MovieCategory.TOP_250_MOVIES)
+                getCollection(movieCategory = MovieCategory.TOP_250_TV_SHOWS)
+                getCollection(movieCategory = MovieCategory.COMICS_THEME)
+                hasLoadedInitialData = true
+            }
         }
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = HomeState()
+        )
 
-    fun getMovieDetails(movieId: Int) {
+
+    private fun getCollection(movieCategory: MovieCategory) {
         viewModelScope.launch {
-            val response = movieRepository.getMovieDetails(movieId)
+            val response = movieRepository.getCollection(type = movieCategory, 1)
             when (response) {
                 is Result.Error -> {
                     val errorMessage =
@@ -56,12 +55,20 @@ class MovieDetailsViewModel(
                 is Result.Success -> {
                     _state.value =
                         _state.value.copy(
-                            movieDetails = response.data,
+                            movieCollection = _state.value.movieCollection + (movieCategory to response.data),
                             loading = false,
                             error = null,
                         )
                 }
             }
+
         }
     }
+
+    fun onAction(action: HomeAction) {
+        when (action) {
+            else -> Unit
+        }
+    }
+
 }

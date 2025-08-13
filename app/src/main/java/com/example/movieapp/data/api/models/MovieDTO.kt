@@ -42,24 +42,24 @@ data class MovieDTO(
     @SerialName("ratingAgeLimits") var ratingAgeLimits: String? = null,
     @SerialName("countries") var countries: List<CountriesDTO>? = null,
     @SerialName("genres") var genres: List<GenresDTO>? = null,
-    @SerialName("startYear") var startYear: String? = null,
-    @SerialName("endYear") var endYear: String? = null,
+    @SerialName("startYear") var startYear: Int? = null,
+    @SerialName("endYear") var endYear: Int? = null,
     @SerialName("serial") var serial: Boolean? = null,
     @SerialName("shortFilm") var shortFilm: Boolean? = null,
     @SerialName("completed") var completed: Boolean? = null,
     @SerialName("hasImax") var hasImax: Boolean? = null,
     @SerialName("has3D") var has3D: Boolean? = null,
-    @SerialName("lastSync") var lastSync: String?  = null
+    @SerialName("lastSync") var lastSync: String? = null,
 )
 
 @Serializable
 data class CountriesDTO(
-    @SerialName("country") var country: String? = null
+    @SerialName("country") var country: String? = null,
 )
 
 @Serializable
 data class GenresDTO(
-    @SerialName("genre") var genre: String? = null
+    @SerialName("genre") var genre: String? = null,
 )
 
 @Serializable
@@ -69,7 +69,7 @@ enum class ProductionStatusDTO {
     COMPLETED,
     ANNOUNCED,
     UNKNOWN,
-    POST_PRODUCTION
+    POST_PRODUCTION,
 }
 
 @Serializable
@@ -78,5 +78,5 @@ enum class TypeDTO {
     VIDEO,
     TV_SERIES,
     MINI_SERIES,
-    TV_SHOW
+    TV_SHOW,
 }

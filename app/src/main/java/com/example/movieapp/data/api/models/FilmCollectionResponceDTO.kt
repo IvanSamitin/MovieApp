@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 data class FilmCollectionResponseDTO(
     @SerialName("total") var total: Int?,
     @SerialName("totalPages") var totalPages: Int?,
-    @SerialName("items") var items: List<MovieDTO>
+    @SerialName("items") var items: List<MovieDTO>,
 )

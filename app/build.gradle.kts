@@ -1,19 +1,19 @@
-import org.gradle.internal.configuration.problems.PropertyTrace
-import org.jetbrains.kotlin.konan.properties.Properties
+
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.util.Properties
+
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-//    alias(libs.plugins.jetbrainsKotlinJvm)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ktlint)
 }
 
 android {
     namespace = "com.example.movieapp"
     compileSdk = 36
-
-
 
     defaultConfig {
         applicationId = "com.example.movieapp"
@@ -30,19 +30,45 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()){
+        localProperties.load(localPropertiesFile.inputStream())
+    }
+
+    val apiKey: String = localProperties.getProperty("API_KEY", "")
+
+    buildTypes{
+        getByName("debug"){
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+        }
+        getByName("release"){
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+        }
+    }
+
+}
+
+ktlint {
+    android = true
+    ignoreFailures = false
+    reporters {
+        reporter(ReporterType.PLAIN)
+        reporter(ReporterType.CHECKSTYLE)
+        reporter(ReporterType.SARIF)
     }
 }
 

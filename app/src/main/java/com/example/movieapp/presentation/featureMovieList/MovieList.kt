@@ -36,25 +36,26 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.presentation.ui.theme.MovieAppTheme
-import com.example.movieapp.presentation.uiComponents.PullToRefreshLazyColumn
+import com.example.movieapp.presentation.ui.uiComponents.LoadingIndicator
+import com.example.movieapp.presentation.ui.uiComponents.PullToRefreshLazyColumn
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MovieListRoot(
     viewModel: MovieListViewModel = koinViewModel(),
-    onItemClick: (movieId: Int) -> Unit
+    onItemClick: (movieId: Int) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     MovieListScreen(
         state = state,
         onAction = { action ->
-            when(action){
+            when (action) {
                 is MovieListAction.ItemClickAction -> onItemClick(action.id)
                 else -> Unit
             }
             viewModel.onAction(action)
-        }
+        },
     )
 }
 
@@ -64,34 +65,34 @@ fun MovieListScreen(
     onAction: (MovieListAction) -> Unit,
 ) {
     Scaffold(
-        topBar = { TopBar() }
+        topBar = { TopBar() },
     ) { padding ->
         when {
             state.loading -> {
-                CircularProgressIndicator(modifier = Modifier.padding(padding))
+                LoadingIndicator()
             }
 
             state.error != null -> {
                 ErrorScreen(
                     modifier = Modifier.padding(padding),
                     onAction = { onAction(MovieListAction.ActionUpdate) },
-                    error = state.error
+                    error = state.error,
                 )
             }
 
             state.movieDetails != null -> {
                 MovieList(
                     movies = state.movieDetails,
-                    modifier = Modifier
-                        .padding(padding),
+                    modifier =
+                        Modifier
+                            .padding(padding),
                     onAction = onAction,
-                    state = state
+                    state = state,
                 )
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,8 +106,7 @@ private fun MovieList(
     movies: List<Movie>,
     onAction: (MovieListAction) -> Unit,
     state: MovieListState,
-
-    ) {
+) {
     PullToRefreshLazyColumn(
         modifier = modifier,
         items = movies,
@@ -114,11 +114,11 @@ private fun MovieList(
             MovieListCard(
                 movieItem = movie,
                 modifier = Modifier.fillMaxWidth(),
-                onAction = onAction
+                onAction = onAction,
             )
         },
         isRefreshing = state.isRefreshing,
-        onRefresh = { onAction(MovieListAction.ActionUpdate) }
+        onRefresh = { onAction(MovieListAction.ActionUpdate) },
     )
 
 //    LazyColumn(
@@ -156,39 +156,50 @@ private fun ErrorScreen(
 private fun MovieListCard(
     modifier: Modifier = Modifier,
     movieItem: Movie,
-    onAction: (MovieListAction) -> Unit
+    onAction: (MovieListAction) -> Unit,
 ) {
     Card(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { movieItem.kinopoiskId?.let { onAction(MovieListAction.ItemClickAction(it)) } }
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(12.dp))
+                .clickable {
+                    movieItem.kinopoiskId?.let {
+                        onAction(
+                            MovieListAction.ItemClickAction(
+                                it,
+                            ),
+                        )
+                    }
+                },
     ) {
         Row {
             Box {
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(movieItem.posterUrlPreview)
-                        .crossfade(true)
-                        .memoryCachePolicy(CachePolicy.ENABLED)     // ← включить кэш в памяти
-                        .diskCachePolicy(CachePolicy.ENABLED)       // ← включить кэш на диске
-                        .build(),
+                    model =
+                        ImageRequest
+                            .Builder(LocalContext.current)
+                            .data(movieItem.posterUrlPreview)
+                            .crossfade(true)
+                            .memoryCachePolicy(CachePolicy.ENABLED) // ← включить кэш в памяти
+                            .diskCachePolicy(CachePolicy.ENABLED) // ← включить кэш на диске
+                            .build(),
                     contentDescription = null,
-
-                    modifier = Modifier
-                        .height(150.dp)
-                        .padding(start = 6.dp, top = 6.dp, bottom = 6.dp)
-                        .clip(
-                            RoundedCornerShape(8.dp)
-                        )
+                    modifier =
+                        Modifier
+                            .height(150.dp)
+                            .padding(start = 6.dp, top = 6.dp, bottom = 6.dp)
+                            .clip(
+                                RoundedCornerShape(8.dp),
+                            ),
                 )
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .offset(10.dp, 11.dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(color = Color.Green)
-                        .size(21.dp, 17.dp)
-
+                    modifier =
+                        Modifier
+                            .offset(10.dp, 11.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(color = Color.Green)
+                            .size(21.dp, 17.dp),
                 ) {
                     Text(
                         text = movieItem.ratingKinopoisk.toString(),
@@ -200,23 +211,24 @@ private fun MovieListCard(
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
                     text = movieItem.nameRu.toString(),
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
                 )
                 Text(
                     text = "${movieItem.nameOriginal ?: movieItem.nameRu}, ${movieItem.year}",
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
                 )
 
                 Text(
-                    text = buildString {
-                        append(
-                            movieItem.countries?.joinToString()
-                        )
-                        append(" • ")
-                        append(
-                            movieItem.genres?.joinToString()
-                        )
-                    },
+                    text =
+                        buildString {
+                            append(
+                                movieItem.countries?.joinToString(),
+                            )
+                            append(" • ")
+                            append(
+                                movieItem.genres?.joinToString(),
+                            )
+                        },
                     style = MaterialTheme.typography.labelMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -226,14 +238,13 @@ private fun MovieListCard(
     }
 }
 
-
 @Preview
 @Composable
 private fun Preview() {
     MovieAppTheme {
         MovieListScreen(
             state = MovieListState(),
-            onAction = {}
+            onAction = {},
         )
     }
 }
