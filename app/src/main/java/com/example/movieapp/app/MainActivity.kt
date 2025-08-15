@@ -39,8 +39,6 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(Screens.MovieListScreen(category = it))
                             }
                         )
-
-
                     }
                     composable<Screens.MovieListScreen> {
                         val args = it.toRoute<Screens.MovieListScreen>()

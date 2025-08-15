@@ -42,6 +42,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.koin.android)
     implementation(libs.koin.android.compose)
+    implementation(libs.paging3)
+    implementation(libs.paging3.compose)
 
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

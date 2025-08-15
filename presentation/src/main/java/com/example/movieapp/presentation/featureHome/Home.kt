@@ -187,7 +187,6 @@ private fun CarouselItem(
             model =
                 ImageRequest
                     .Builder(LocalContext.current)
-//                    .placeholder(R.drawable.f1_poster)
                     .data(movieItem.posterUrl)
                     .crossfade(true)
                     .memoryCachePolicy(CachePolicy.ENABLED)

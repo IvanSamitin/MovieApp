@@ -58,6 +58,7 @@ val mainModule =
             get<Retrofit>().create(KinopoiskApi::class.java)
         }
 
+
         viewModel {
             HomeViewModel(get())
         }

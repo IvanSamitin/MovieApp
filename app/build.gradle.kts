@@ -35,8 +35,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
     }
 
     buildFeatures {
@@ -76,7 +80,6 @@ dependencies {
     implementation(project(":presentation"))
     implementation(project(":domain"))
     implementation(project(":data"))
-    implementation(libs.coil.compose)
     implementation(libs.logging.interceptor)
     implementation(libs.retrofit)
     implementation(libs.retrofit2.kotlinx.serialization.converter)

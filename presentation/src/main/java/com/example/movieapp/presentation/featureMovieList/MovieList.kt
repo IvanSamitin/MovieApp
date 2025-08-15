@@ -2,8 +2,10 @@ package com.example.movieapp.presentation.featureMovieList
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -21,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,66 +35,47 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.presentation.ui.theme.MovieAppTheme
 import com.example.movieapp.presentation.ui.uiComponents.LoadingIndicator
-import com.example.movieapp.presentation.ui.uiComponents.PullToRefreshLazyColumn
 import org.koin.androidx.compose.koinViewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 
 @Composable
 fun MovieListRoot(
     viewModel: MovieListViewModel = koinViewModel(),
     onItemClick: (movieId: Int) -> Unit,
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    val pagingItems = viewModel.pagingData.collectAsLazyPagingItems()
 
     MovieListScreen(
-        state = state,
-        onAction = { action ->
-            when (action) {
-                is MovieListAction.ItemClickAction -> onItemClick(action.id)
-                else -> Unit
-            }
-            viewModel.onAction(action)
-        },
+        pagingItems = pagingItems,
+        onItemClick = onItemClick
     )
 }
 
 @Composable
 fun MovieListScreen(
-    state: MovieListState,
-    onAction: (MovieListAction) -> Unit,
+    pagingItems: LazyPagingItems<Movie>,
+    onItemClick: (movieId: Int) -> Unit,
 ) {
+
     Scaffold(
         topBar = { TopBar() },
     ) { padding ->
-        when {
-            state.loading -> {
-                LoadingIndicator()
-            }
-
-            state.error != null -> {
-                ErrorScreen(
-                    modifier = Modifier.padding(padding),
-                    onAction = { onAction(MovieListAction.ActionUpdate) },
-                    error = state.error,
-                )
-            }
-
-            state.movieDetails != null -> {
-                MovieList(
-                    movies = state.movieDetails,
-                    modifier =
-                        Modifier
-                            .padding(padding),
-                    onAction = onAction,
-                    state = state,
-                )
-            }
-        }
+        MovieList(
+            pagingItems = pagingItems,
+            modifier =
+                Modifier
+                    .padding(padding),
+            onItemClick = onItemClick,
+        )
     }
 }
 
@@ -102,49 +88,61 @@ private fun TopBar(modifier: Modifier = Modifier) {
 @Composable
 private fun MovieList(
     modifier: Modifier = Modifier,
-    movies: List<Movie>,
-    onAction: (MovieListAction) -> Unit,
-    state: MovieListState,
+    pagingItems: LazyPagingItems<Movie>,
+    onItemClick: (movieId: Int) -> Unit,
 ) {
-    PullToRefreshLazyColumn(
+    LazyColumn(
         modifier = modifier,
-        items = movies,
-        content = { movie ->
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp)
+    ) {
+        items(pagingItems.itemCount) { movie ->
+            val item = pagingItems[movie]
             MovieListCard(
-                movieItem = movie,
+                movieItem = item!!,
                 modifier = Modifier.fillMaxWidth(),
-                onAction = onAction,
+                onItemClick = onItemClick
             )
-        },
-        isRefreshing = state.isRefreshing,
-        onRefresh = { onAction(MovieListAction.ActionUpdate) },
-    )
-
-//    LazyColumn(
-//        modifier = modifier,
-//        verticalArrangement = Arrangement.spacedBy(8.dp),
-//        contentPadding = PaddingValues(horizontal = 4.dp)
-//    ) {
-//        items(movies) { movie ->
-//            MovieListCard(
-//                movieItem = movie,
-//                modifier = Modifier.fillMaxWidth(),
-//                onAction = onAction
-//            )
-//        }
-//    }
+        }
+        pagingItems.loadState.refresh.let { loadState ->
+            if (loadState is LoadState.Error) {
+                item {
+                    ErrorScreen(
+                        modifier = Modifier,
+                        onAction = { pagingItems.retry() },
+                        error = loadState.error.message ?: "",
+                    )
+                }
+            } else if (loadState is LoadState.Loading) {
+                item {
+                    LoadingIndicator()
+                }
+            }
+        }
+        pagingItems.loadState.append.let { loadState ->
+            if (loadState is LoadState.Error) {
+                item {
+                    ErrorScreen(
+                        modifier = Modifier,
+                        onAction = { pagingItems.retry() },
+                        error = "ошибка",
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
 private fun ErrorScreen(
     error: String,
     modifier: Modifier = Modifier,
-    onAction: (MovieListAction) -> Unit,
+    onAction: () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = error)
-            Button(onClick = { onAction }) {
+            Button(onClick = onAction) {
                 Text(text = "Обновить")
             }
         }
@@ -155,7 +153,7 @@ private fun ErrorScreen(
 private fun MovieListCard(
     modifier: Modifier = Modifier,
     movieItem: Movie,
-    onAction: (MovieListAction) -> Unit,
+    onItemClick: (movieId: Int) -> Unit,
 ) {
     Card(
         modifier =
@@ -163,11 +161,7 @@ private fun MovieListCard(
                 .clip(RoundedCornerShape(12.dp))
                 .clickable {
                     movieItem.kinopoiskId?.let {
-                        onAction(
-                            MovieListAction.ItemClickAction(
-                                it,
-                            ),
-                        )
+                        onItemClick(it)
                     }
                 },
     ) {
@@ -241,9 +235,9 @@ private fun MovieListCard(
 @Composable
 private fun Preview() {
     MovieAppTheme {
-        MovieListScreen(
-            state = MovieListState(),
-            onAction = {},
-        )
+//        MovieListScreen(
+//            pagingItems = LazyPagingItems<Movie> ,
+//            onItemClick = {},
+//        )
     }
 }

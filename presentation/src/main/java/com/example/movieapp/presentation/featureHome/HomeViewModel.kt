@@ -44,6 +44,7 @@ class HomeViewModel(
                     val errorMessage =
                         when (response.error) {
                             DataError.Network.NO_INTERNET -> "Отсутсвует интернет"
+                            DataError.Network.SERVER_ERROR -> "Ошибка сервера"
                         }
                     _state.value =
                         _state.value.copy(
