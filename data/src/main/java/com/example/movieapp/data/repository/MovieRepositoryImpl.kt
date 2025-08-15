@@ -8,6 +8,7 @@ import com.example.movieapp.data.api.MoviePagingSource
 import com.example.movieapp.data.api.KinopoiskApi
 import com.example.movieapp.data.local.dao.MovieDao
 import com.example.movieapp.data.mappers.toMovie
+import com.example.movieapp.data.mappers.toMovieEntity
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.domain.repository.MovieRepository
@@ -52,16 +53,18 @@ class MovieRepositoryImpl(
         ).flow
     }
 
-    private var movieCache = mutableMapOf<Int, Movie>()
 
     override suspend fun getMovieDetails(movieId: Int): Result<Movie, DataError.Network> =
         withContext(Dispatchers.IO) {
-            movieCache[movieId]?.let {
-                return@withContext Result.Success(it)
+
+            val localMovie = dao.getMovie(movieId)?.toMovie()
+            if (localMovie != null){
+                return@withContext Result.Success(localMovie)
             }
+
             try {
                 val dto = api.getMovieDetail(movieId)
-                movieCache[movieId] = dto.toMovie()
+                dao.upsertMovieItem(dto.toMovieEntity())
                 Result.Success(dto.toMovie())
 
             } catch (e: IOException) {

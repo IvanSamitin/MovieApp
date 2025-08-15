@@ -71,6 +71,65 @@ internal fun MovieDTO.toMovie(): Movie =
         completed = completed,
     )
 
+internal fun MovieDTO.toMovieEntity(): MovieEntity =
+    MovieEntity(
+        kinopoiskId = kinopoiskId,
+        nameRu = nameRu,
+        nameOriginal = nameOriginal,
+        posterUrl = posterUrl,
+        posterUrlPreview = posterUrlPreview,
+        coverUrl = coverUrl,
+        logoUrl = logoUrl,
+        reviewsCount = reviewsCount,
+        ratingGoodReview = ratingGoodReview,
+        ratingGoodReviewVoteCount = ratingGoodReviewVoteCount,
+        ratingKinopoisk = ratingKinopoisk,
+        ratingKinopoiskVoteCount = ratingKinopoiskVoteCount,
+        ratingImdb = ratingImdb,
+        ratingImdbVoteCount = ratingImdbVoteCount,
+        ratingFilmCritics = ratingFilmCritics,
+        ratingFilmCriticsVoteCount = ratingFilmCriticsVoteCount,
+        ratingAwait = ratingAwait,
+        ratingAwaitCount = ratingAwaitCount,
+        ratingRfCritics = ratingRfCritics,
+        ratingRfCriticsVoteCount = ratingRfCriticsVoteCount,
+        year = year,
+        filmLength = filmLength,
+        slogan = slogan,
+        description = description,
+        shortDescription = shortDescription,
+        editorAnnotation = editorAnnotation,
+        isTicketsAvailable = isTicketsAvailable,
+        productionStatus =
+            when (productionStatus) {
+                ProductionStatusDTO.FILMING -> ProductionStatusEntity.FILMING
+                ProductionStatusDTO.PRE_PRODUCTION -> ProductionStatusEntity.PRE_PRODUCTION
+                ProductionStatusDTO.COMPLETED -> ProductionStatusEntity.COMPLETED
+                ProductionStatusDTO.ANNOUNCED -> ProductionStatusEntity.ANNOUNCED
+                ProductionStatusDTO.UNKNOWN -> ProductionStatusEntity.UNKNOWN
+                ProductionStatusDTO.POST_PRODUCTION -> ProductionStatusEntity.POST_PRODUCTION
+                null -> ProductionStatusEntity.UNKNOWN
+            },
+        type =
+            when (type) {
+                TypeDTO.FILM -> TypeEntity.FILM
+                TypeDTO.TV_SERIES -> TypeEntity.TV_SERIES
+                TypeDTO.MINI_SERIES -> TypeEntity.MINI_SERIES
+                TypeDTO.TV_SHOW -> TypeEntity.TV_SHOW
+                TypeDTO.VIDEO -> TypeEntity.VIDEO
+                else -> TypeEntity.FILM
+            },
+        ratingMpaa = ratingMpaa,
+        ratingAgeLimits = ratingAgeLimits,
+        countries = countries?.mapNotNull { it.country } ?: emptyList(),
+        genres = genres?.mapNotNull { it.genre } ?: emptyList(),
+        startYear = startYear,
+        endYear = endYear,
+        serial = serial,
+        shortFilm = shortFilm,
+        completed = completed,
+    )
+
 internal fun MovieEntity.toMovieDto(): MovieDTO =
     MovieDTO(
         kinopoiskId = kinopoiskId,
