@@ -20,7 +20,7 @@ import retrofit2.Retrofit
 val mainModule =
     module {
         single<MovieRepository> {
-            MovieRepositoryImpl(get())
+            MovieRepositoryImpl(get(), get())
         }
 
         single {

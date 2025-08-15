@@ -1,7 +1,11 @@
-package com.example.movieapp.domain.model
+package com.example.movieapp.data.local.entity
 
-data class Movie(
-    val kinopoiskId: Int?,
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+data class MovieEntity(
+    @PrimaryKey val kinopoiskId: Int,
     val nameRu: String?,
     val nameOriginal: String?,
     val posterUrl: String?,
@@ -22,14 +26,14 @@ data class Movie(
     val ratingRfCritics: Double?,
     val ratingRfCriticsVoteCount: Int?,
     val year: Int?,
-    val filmLength: Int? ,
+    val filmLength: Int?,
     val slogan: String?,
     val description: String?,
     val shortDescription: String?,
     val editorAnnotation: String?,
     val isTicketsAvailable: Boolean?,
-    val productionStatus: ProductionStatus?,
-    val type: Type?,
+    val productionStatus: ProductionStatusEntity?,
+    val type: TypeEntity?,
     val ratingMpaa: String?,
     val ratingAgeLimits: String?,
     val countries: List<String>?,
@@ -41,7 +45,7 @@ data class Movie(
     val completed: Boolean?
 )
 
-enum class ProductionStatus {
+enum class ProductionStatusEntity {
     FILMING,
     PRE_PRODUCTION,
     COMPLETED,
@@ -50,7 +54,7 @@ enum class ProductionStatus {
     POST_PRODUCTION,
 }
 
-enum class Type {
+enum class TypeEntity {
     FILM,
     VIDEO,
     TV_SERIES,

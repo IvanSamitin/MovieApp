@@ -4,8 +4,9 @@ package com.example.movieapp.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.example.movieapp.data.MoviePagingSource
+import com.example.movieapp.data.api.MoviePagingSource
 import com.example.movieapp.data.api.KinopoiskApi
+import com.example.movieapp.data.local.dao.MovieDao
 import com.example.movieapp.data.mappers.toMovie
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.MovieCategory
@@ -19,6 +20,7 @@ import okio.IOException
 
 class MovieRepositoryImpl(
     private val api: KinopoiskApi,
+    private val dao: MovieDao
 ) : MovieRepository {
     override suspend fun getCollection(
         type: MovieCategory,
