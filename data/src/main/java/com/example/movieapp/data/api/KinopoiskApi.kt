@@ -19,4 +19,10 @@ interface KinopoiskApi {
     suspend fun getMovieDetail(
         @Path("movieId") movieId: Int,
     ): MovieDTO
+
+    @GET("/api/v2.2/films")
+    suspend fun searchMovie(
+        @Query("keyword") keyword: String? = "",
+        @Query("page") page: Int = 1,
+    ): FilmCollectionResponseDTO
 }

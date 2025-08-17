@@ -58,7 +58,7 @@ class MovieRepositoryImpl(
         withContext(Dispatchers.IO) {
 
             val localMovie = dao.getMovie(movieId)?.toMovie()
-            if (localMovie != null){
+            if (localMovie != null) {
                 return@withContext Result.Success(localMovie)
             }
 
@@ -66,6 +66,18 @@ class MovieRepositoryImpl(
                 val dto = api.getMovieDetail(movieId)
                 dao.upsertMovieItem(dto.toMovieEntity())
                 Result.Success(dto.toMovie())
+
+            } catch (e: IOException) {
+                Result.Error(DataError.Network.NO_INTERNET)
+            }
+        }
+
+    override suspend fun searchMovie(keyword: String): Result<List<Movie>, DataError.Network> =
+        withContext(Dispatchers.IO) {
+
+            try {
+                val dto = api.searchMovie(keyword = keyword)
+                Result.Success(dto.items.map { it.toMovie() })
 
             } catch (e: IOException) {
                 Result.Error(DataError.Network.NO_INTERNET)

@@ -47,22 +47,7 @@ android {
         compose = true
         buildConfig = true
     }
-    val localProperties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()){
-        localProperties.load(localPropertiesFile.inputStream())
-    }
 
-    val apiKey: String = localProperties.getProperty("API_KEY", "")
-
-    buildTypes{
-        getByName("debug"){
-            buildConfigField("String", "API_KEY", "\"$apiKey\"")
-        }
-        getByName("release"){
-            buildConfigField("String", "API_KEY", "\"$apiKey\"")
-        }
-    }
 
 }
 
@@ -80,9 +65,6 @@ dependencies {
     implementation(project(":presentation"))
     implementation(project(":domain"))
     implementation(project(":data"))
-    implementation(libs.logging.interceptor)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.koin.android)
     implementation(libs.koin.android.compose)
     implementation(libs.kotlinx.serialization.json)

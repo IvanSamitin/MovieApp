@@ -17,4 +17,6 @@ interface MovieRepository {
     fun getPagingCollection(movieCategory: MovieCategory): Flow<PagingData<Movie>>
 
     suspend fun getMovieDetails(movieId: Int): Result<Movie, DataError.Network>
+
+    suspend fun searchMovie(keyword: String): Result<List<Movie>, DataError.Network>
 }

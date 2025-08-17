@@ -10,4 +10,5 @@ plugins {
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.jetbrainsKotlinJvm) apply false
     alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.google.gms.google.services) apply false
 }

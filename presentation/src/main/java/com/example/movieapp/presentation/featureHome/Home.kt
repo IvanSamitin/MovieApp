@@ -47,7 +47,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.example.movieapp.R
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.presentation.ui.theme.MovieAppTheme
@@ -103,7 +102,7 @@ fun HomeScreen(
                         listMovie = state.movieCollection[MovieCategory.TOP_POPULAR_ALL]
                             ?: emptyList(),
                         onAction = onAction,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        modifier = Modifier
                     )
                     HorizontalDivider(Modifier.padding(top = 12.dp))
                     RowList(
@@ -157,7 +156,11 @@ private fun PopularNow(
     onAction: (HomeAction) -> Unit,
 ) {
     Column(modifier = modifier) {
-        Text(text = "Самые популярные фильмы", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = "Самые популярные фильмы",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
         HorizontalUncontainedCarousel(
             state = remember(listMovie.size) {
                 CarouselState(
@@ -165,7 +168,9 @@ private fun PopularNow(
                     currentItem = 0
                 )
             },
-            itemWidth = 250.dp,
+            itemWidth = 235.dp,
+            itemSpacing = 4.dp,
+            contentPadding = PaddingValues(horizontal = 8.dp)
         ) { movie ->
             val item = listMovie[movie]
             CarouselItem(movieItem = item, onAction = onAction)
@@ -195,7 +200,8 @@ private fun CarouselItem(
             contentDescription = null,
             modifier =
                 Modifier
-                    .height(350.dp)
+                    .height(345.dp)
+                    .width(230.dp)
                     .clip(
                         RoundedCornerShape(12.dp),
                     ),
