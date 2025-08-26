@@ -4,6 +4,7 @@ import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.example.movieapp.data.local.entity.ProductionStatusEntity
 import com.example.movieapp.data.local.entity.TypeEntity
+import com.example.movieapp.domain.model.MovieCategory
 
 class Converters {
     @TypeConverter
@@ -34,6 +35,16 @@ class Converters {
     @TypeConverter
     fun toType(type: String?): TypeEntity?{
         return type?.let { TypeEntity.valueOf(it) }
+    }
+
+    @TypeConverter
+    fun fromMovieCategory(status: MovieCategory?): String?{
+        return status?.name
+    }
+
+    @TypeConverter
+    fun toMovieCategory(status: String?): MovieCategory?{
+        return status?.let { MovieCategory.valueOf(it) }
     }
 }
 

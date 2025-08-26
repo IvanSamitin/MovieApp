@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.CarouselState
 import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
@@ -57,21 +56,13 @@ import kotlin.collections.List
 @Composable
 fun HomeRoot(
     viewModel: HomeViewModel = koinViewModel(),
-    onItemClick: (movieId: Int) -> Unit,
-    onCategoryClick: (movieCategory: MovieCategory) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     HomeScreen(
         state = state,
-        onAction = { action ->
-            when (action) {
-                is HomeAction.ItemClickAction -> onItemClick(action.movieId)
-                is HomeAction.OnCategoryClick -> onCategoryClick(action.movieCategory)
-                else -> Unit
-            }
-            viewModel.onAction(action)
-        },
+        onAction = viewModel::onAction
+
     )
 }
 
@@ -92,42 +83,42 @@ fun HomeScreen(
         }
 
         state.movieCollection != null -> {
-            Scaffold { innerPadding ->
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(scrollState)
-                        .padding(innerPadding)
-                ) {
-                    PopularNow(
-                        listMovie = state.movieCollection[MovieCategory.TOP_POPULAR_ALL]
-                            ?: emptyList(),
-                        onAction = onAction,
-                        modifier = Modifier
-                    )
-                    HorizontalDivider(Modifier.padding(top = 12.dp))
-                    RowList(
-                        listMovie = state.movieCollection[MovieCategory.TOP_250_MOVIES]
-                            ?: emptyList(),
-                        listDescription = "250 лучших фильмов кинопоиска.",
-                        onAction = onAction,
-                        movieCategory = MovieCategory.TOP_250_MOVIES,
-                    )
-                    RowList(
-                        listMovie = state.movieCollection[MovieCategory.TOP_250_TV_SHOWS]
-                            ?: emptyList(),
-                        listDescription = "250 лучших сериалов кинопоиска.",
-                        onAction = onAction,
-                        movieCategory = MovieCategory.TOP_250_TV_SHOWS,
-                    )
-                    RowList(
-                        listMovie = state.movieCollection[MovieCategory.COMICS_THEME]
-                            ?: emptyList(),
-                        listDescription = "Лучшие фильмы по комиксам.",
-                        onAction = onAction,
-                        movieCategory = MovieCategory.COMICS_THEME,
-                    )
-                }
+            Column(
+                modifier = Modifier
+                    .verticalScroll(scrollState)
+                    .fillMaxSize()
+
+            ) {
+                PopularNow(
+                    listMovie = state.movieCollection[MovieCategory.TOP_POPULAR_ALL]
+                        ?: emptyList(),
+                    onAction = onAction,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                HorizontalDivider(Modifier.padding(top = 12.dp))
+                RowList(
+                    listMovie = state.movieCollection[MovieCategory.TOP_250_MOVIES]
+                        ?: emptyList(),
+                    listDescription = "250 лучших фильмов кинопоиска.",
+                    onAction = onAction,
+                    movieCategory = MovieCategory.TOP_250_MOVIES,
+                )
+                RowList(
+                    listMovie = state.movieCollection[MovieCategory.TOP_250_TV_SHOWS]
+                        ?: emptyList(),
+                    listDescription = "250 лучших сериалов кинопоиска.",
+                    onAction = onAction,
+                    movieCategory = MovieCategory.TOP_250_TV_SHOWS,
+                )
+                RowList(
+                    listMovie = state.movieCollection[MovieCategory.COMICS_THEME]
+                        ?: emptyList(),
+                    listDescription = "Лучшие фильмы по комиксам.",
+                    onAction = onAction,
+                    movieCategory = MovieCategory.COMICS_THEME,
+                )
             }
+
         }
     }
 }
@@ -140,8 +131,8 @@ private fun ErrorStateHome(
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Ошибка")
-            Button(onClick = { onAction }) {
+            Text(text = "Ошибка $errorText")
+            Button(onClick = { onAction(HomeAction.Refresh) }) {
                 Text(text = "Обновить")
             }
         }
@@ -278,7 +269,9 @@ private fun RowMovieCard(
                 .width(130.dp)
                 .height(235.dp)
                 .clickable {
-                    movieItem.kinopoiskId?.let { onAction(HomeAction.ItemClickAction(it)) }
+                    movieItem.kinopoiskId?.let {
+                        onAction(HomeAction.ItemClickAction(it))
+                    }
                 }
         ) {
             Box {
@@ -288,6 +281,8 @@ private fun RowMovieCard(
                             .Builder(LocalContext.current)
                             .data(movieItem.posterUrlPreview)
                             .crossfade(true)
+                            .placeholder(com.example.movieapp.R.drawable.loading_placeholder)
+                            .error(com.example.movieapp.R.drawable.error_placeholder)
                             .memoryCachePolicy(CachePolicy.ENABLED)
                             .diskCachePolicy(CachePolicy.ENABLED)
                             .build(),

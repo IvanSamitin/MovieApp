@@ -8,5 +8,7 @@ data class SearchState(
     val isSearching: Boolean = false,
     val loading: Boolean = false,
     val error: String = "",
-    val inputTextError: Boolean = false
+    val isInputTextError: Boolean = false,
+    val searchErrorText: String = ""
 )
+

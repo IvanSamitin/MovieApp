@@ -1,5 +1,7 @@
 package com.example.movieapp.presentation.searchFeature
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,18 +11,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,19 +41,13 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SearchRoot(
     viewModel: SearchViewModel = koinViewModel(),
-    onItemClick: (Int) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     SearchScreen(
         state = state,
-        onAction = { action ->
-            when (action) {
-                is SearchAction.onItemClick -> onItemClick(action.id)
-                else -> Unit
-            }
-            viewModel.onAction(action)
-        }
+        onAction = viewModel::onAction
+
     )
 }
 
@@ -60,29 +61,55 @@ fun SearchScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        TextField(
-            value = state.searchText,
-            onValueChange = { onAction(SearchAction.onSearchTextChange(it)) },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(text = "Поиск") },
-            trailingIcon = {
-                IconButton(onClick = { onAction(SearchAction.onSearchClick) }) {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                }
-            },
-            isError = state.inputTextError,
-            singleLine = true
-        )
+
         when {
             state.error.isNotBlank() -> {
                 ErrorState(modifier = Modifier.padding(), onAction, state.error)
             }
-            state.loading ->{
+
+            state.loading -> {
                 LoadingIndicator()
             }
         }
-        MovieList(movieItems = state.listMovie, onAction = onAction)
+        MovieList(movieItems = state.listMovie, onAction = onAction, state = state)
     }
+}
+
+@Composable
+fun SearchBar(
+    modifier: Modifier = Modifier,
+    state: SearchState,
+    onAction: (SearchAction) -> Unit,
+) {
+    val focusManager = LocalFocusManager.current
+    OutlinedTextField(
+        value = state.searchText,
+        onValueChange = { onAction(SearchAction.OnSearchTextChange(it)) },
+        placeholder = { Text(text = "Поиск") },
+        trailingIcon = {
+            IconButton(onClick = { onAction(SearchAction.OnSearchClick) }) {
+                Icon(imageVector = Icons.Default.Search, contentDescription = null)
+            }
+        },
+        supportingText = {
+            AnimatedVisibility(visible = state.isInputTextError) {
+                Text(text = state.searchErrorText)
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Search,
+        ),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                onAction(SearchAction.OnSearchClick)
+                focusManager.clearFocus()
+            }
+        ),
+        isError = state.isInputTextError,
+        singleLine = true,
+        modifier = modifier
+
+    )
 }
 
 @Composable
@@ -94,8 +121,8 @@ private fun ErrorState(
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = errorText)
-            Button(onClick = { onAction }) {
-                Text(text = "Обновить")
+            Button(onClick = { onAction(SearchAction.OnError) }) {
+                Text(text = "Назад")
             }
         }
     }
@@ -105,6 +132,7 @@ private fun ErrorState(
 @Composable
 private fun MovieList(
     modifier: Modifier = Modifier,
+    state: SearchState,
     movieItems: List<Movie>,
     onAction: (SearchAction) -> Unit,
 ) {
@@ -113,15 +141,30 @@ private fun MovieList(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 4.dp)
     ) {
-        items(movieItems) { movie ->
+        stickyHeader {
+            SearchBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = MaterialTheme.colorScheme.background),
+                state = state,
+                onAction = onAction
+            )
+        }
+        items(
+            items = movieItems,
+            key = { movie ->
+                movie.kinopoiskId!!
+            }
+        ) { movie ->
             MovieListCard(
                 movieItem = movie,
                 modifier = Modifier.fillMaxWidth(),
-                onItemClick = { onAction(SearchAction.onItemClick(it)) }
+                onItemClick = { onAction(SearchAction.OnItemClick(it)) }
             )
         }
     }
 }
+
 
 @Preview
 @Composable

@@ -2,13 +2,17 @@ package com.example.movieapp.presentation.searchFeature
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.repository.MovieRepository
+import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
+import com.example.movieapp.presentation.util.NavigationChannel
+import com.example.movieapp.presentation.util.NavigationEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.String
 
 class SearchViewModel(
     private val movieRepository: MovieRepository,
@@ -22,17 +26,20 @@ class SearchViewModel(
             initialValue = SearchState()
         )
 
+
     private fun searchMovie() {
         viewModelScope.launch {
             if (_state.value.searchText.trim().isBlank()) {
                 _state.value = _state.value.copy(
-                    inputTextError = true
+                    isInputTextError = true,
+                    searchErrorText = "Поиск не может быт пустым"
                 )
                 return@launch
             }
             _state.value = _state.value.copy(
                 loading = true,
-                inputTextError = false
+                isInputTextError = false,
+                searchErrorText = ""
             )
             val result = movieRepository.searchMovie(keyword = _state.value.searchText.trim())
             when (result) {
@@ -45,15 +52,24 @@ class SearchViewModel(
                 }
 
                 is Result.Error -> {
+                    val errorMessage =
+                        when (result.error) {
+                            DataError.Network.NO_INTERNET -> "Отсутсвует интернет"
+                            DataError.Network.SERVER_ERROR -> "Ошибка сервера"
+                        }
                     _state.value = _state.value.copy(
-                        error = result.error.toString()
+                        error = errorMessage
                     )
                 }
             }
-
         }
     }
 
+    private fun sendNavigateEvent(event: NavigationEvent) {
+        viewModelScope.launch {
+            NavigationChannel.sendEvent(event)
+        }
+    }
 
     private fun onSearchTextChange(text: String) {
         _state.value = _state.value.copy(
@@ -61,11 +77,25 @@ class SearchViewModel(
         )
     }
 
+    private fun onErrorAction() {
+        _state.value = _state.value.copy(
+            searchText = "",
+            listMovie = emptyList(),
+            isSearching = false,
+            loading = false,
+            error = "",
+            isInputTextError = false,
+            searchErrorText = ""
+        )
+    }
+
     fun onAction(action: SearchAction) {
         when (action) {
-            is SearchAction.onSearchTextChange -> onSearchTextChange(action.text)
-            is SearchAction.onSearchClick -> searchMovie()
-            else -> Unit
+            is SearchAction.OnSearchTextChange -> onSearchTextChange(action.text)
+            is SearchAction.OnSearchClick -> searchMovie()
+            is SearchAction.OnItemClick -> sendNavigateEvent(NavigationEvent.OnItemClick(action.id))
+            is SearchAction.OnError -> onErrorAction()
         }
     }
 }
+

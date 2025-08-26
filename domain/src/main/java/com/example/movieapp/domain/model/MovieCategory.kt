@@ -5,4 +5,8 @@ enum class MovieCategory {
     TOP_250_MOVIES,
     TOP_250_TV_SHOWS,
     COMICS_THEME,
+
+    SEARCH_HISTORY,
+
+    FAVORITE,
 }

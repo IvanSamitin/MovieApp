@@ -36,6 +36,7 @@ fun MovieListCard(
         modifier =
             modifier
                 .clip(RoundedCornerShape(12.dp))
+                .height(150.dp)
                 .clickable {
                     movieItem.kinopoiskId?.let {
                         onItemClick(it)
@@ -50,8 +51,10 @@ fun MovieListCard(
                             .Builder(LocalContext.current)
                             .data(movieItem.posterUrlPreview)
                             .crossfade(true)
-                            .memoryCachePolicy(CachePolicy.ENABLED) // ← включить кэш в памяти
-                            .diskCachePolicy(CachePolicy.ENABLED) // ← включить кэш на диске
+                            .placeholder(com.example.movieapp.R.drawable.loading_placeholder)
+                            .error(com.example.movieapp.R.drawable.error_placeholder)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
+                            .diskCachePolicy(CachePolicy.ENABLED)
                             .build(),
                     contentDescription = null,
                     modifier =
@@ -62,21 +65,24 @@ fun MovieListCard(
                                 RoundedCornerShape(8.dp),
                             ),
                 )
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier =
-                        Modifier
-                            .offset(10.dp, 11.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(color = Color.Green)
-                            .size(21.dp, 17.dp),
-                ) {
-                    Text(
-                        text = movieItem.ratingKinopoisk.toString(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
-                    )
+                movieItem.ratingKinopoisk?.let { rating ->
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier =
+                            Modifier
+                                .offset(10.dp, 11.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(color = Color.Green)
+                                .size(21.dp, 17.dp),
+                    ) {
+                        Text(
+                            text = rating.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                        )
+                    }
                 }
+
             }
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
@@ -87,7 +93,8 @@ fun MovieListCard(
                 )
                 Text(
                     text = "${movieItem.nameOriginal ?: movieItem.nameRu}, ${movieItem.year}",
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelMedium,
+
                 )
 
                 Text(

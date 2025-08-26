@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -45,7 +46,6 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 
 
@@ -65,8 +65,10 @@ dependencies {
     implementation(project(":presentation"))
     implementation(project(":domain"))
     implementation(project(":data"))
+    implementation(libs.firebase.messaging)
     implementation(libs.koin.android)
     implementation(libs.koin.android.compose)
+    implementation(libs.koin.android.workmanager)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation)
 

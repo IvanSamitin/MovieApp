@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class MovieEntity(
-    @PrimaryKey val kinopoiskId: Int?,
+    @PrimaryKey(autoGenerate = false) val kinopoiskId: Int,
     val nameRu: String?,
     val nameOriginal: String?,
     val posterUrl: String?,
@@ -25,6 +25,7 @@ data class MovieEntity(
     val ratingAwaitCount: Int?,
     val ratingRfCritics: Double?,
     val ratingRfCriticsVoteCount: Int?,
+    val webUrl: String?,
     val year: Int?,
     val filmLength: Int?,
     val slogan: String?,
@@ -42,7 +43,7 @@ data class MovieEntity(
     val endYear: Int?,
     val serial: Boolean?,
     val shortFilm: Boolean?,
-    val completed: Boolean?
+    val completed: Boolean?,
 )
 
 enum class ProductionStatusEntity {

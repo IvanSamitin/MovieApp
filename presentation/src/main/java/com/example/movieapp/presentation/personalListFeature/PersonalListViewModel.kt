@@ -1,4 +1,4 @@
-package com.example.movieapp.presentation.featureHome
+package com.example.movieapp.presentation.personalListFeature
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,37 +14,30 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class HomeViewModel(
+class PersonalListViewModel(
     private val movieRepository: MovieRepository,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
-    private val _state = MutableStateFlow(HomeState())
+    private val _state = MutableStateFlow(PersonalListState())
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
-                loadData()
+                getCollection(MovieCategory.FAVORITE)
                 hasLoadedInitialData = true
             }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = HomeState()
+            initialValue = PersonalListState()
         )
-
-    private fun loadData(){
-        getCollection(movieCategory = MovieCategory.TOP_POPULAR_ALL)
-        getCollection(movieCategory = MovieCategory.TOP_250_MOVIES)
-        getCollection(movieCategory = MovieCategory.TOP_250_TV_SHOWS)
-        getCollection(movieCategory = MovieCategory.COMICS_THEME)
-    }
 
 
     private fun getCollection(movieCategory: MovieCategory) {
         viewModelScope.launch {
-            movieRepository.getCollection(type = movieCategory, 1).collect{ result ->
+            movieRepository.getCollection(type = movieCategory, 1).collect { result ->
                 when (result) {
                     is Result.Error -> {
                         val errorMessage =
@@ -52,19 +45,12 @@ class HomeViewModel(
                                 DataError.Network.NO_INTERNET -> "Отсутсвует интернет"
                                 DataError.Network.SERVER_ERROR -> "Ошибка сервера"
                             }
-                        _state.value =
-                            _state.value.copy(
-                                loading = false,
-                                error = errorMessage,
-                            )
                     }
 
                     is Result.Success -> {
                         _state.value =
                             _state.value.copy(
                                 movieCollection = _state.value.movieCollection + (movieCategory to result.data),
-                                loading = false,
-                                error = null,
                             )
                     }
                 }
@@ -72,19 +58,16 @@ class HomeViewModel(
         }
     }
 
-    private fun sendNavigateEvent(event: NavigationEvent){
+    private fun navigateToMovieDetails(id: Int){
         viewModelScope.launch {
-            NavigationChannel.sendEvent(event)
+            NavigationChannel.sendEvent(NavigationEvent.OnItemClick(id))
         }
     }
 
-    fun onAction(action: HomeAction) {
+    fun onAction(action: PersonalListAction) {
         when (action) {
-            is HomeAction.Refresh -> {
-                loadData()
-            }
-            is HomeAction.ItemClickAction -> sendNavigateEvent(NavigationEvent.OnItemClick(action.movieId))
-            is HomeAction.OnCategoryClick -> sendNavigateEvent(NavigationEvent.OnCategoryClick(action.movieCategory))
+            is PersonalListAction.ItemClickAction -> navigateToMovieDetails(action.movieId)
         }
     }
+
 }

@@ -4,16 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,52 +25,38 @@ import com.example.movieapp.presentation.ui.uiComponents.LoadingIndicator
 import org.koin.androidx.compose.koinViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.movieapp.presentation.ui.uiComponents.MovieListCard
+import com.example.movieapp.presentation.util.NavigationChannel
+import com.example.movieapp.presentation.util.NavigationEvent
+import kotlinx.coroutines.launch
 
 @Composable
 fun MovieListRoot(
     viewModel: MovieListViewModel = koinViewModel(),
-    onItemClick: (movieId: Int) -> Unit,
 ) {
-
     val pagingItems = viewModel.pagingData.collectAsLazyPagingItems()
 
     MovieListScreen(
         pagingItems = pagingItems,
-        onItemClick = onItemClick
     )
 }
 
 @Composable
 fun MovieListScreen(
     pagingItems: LazyPagingItems<Movie>,
-    onItemClick: (movieId: Int) -> Unit,
 ) {
+    MoviePagingList(
+        pagingItems = pagingItems,
+        modifier = Modifier,
+    )
 
-    Scaffold(
-        topBar = { TopBar() },
-    ) { padding ->
-        MoviePagingList(
-            pagingItems = pagingItems,
-            modifier =
-                Modifier
-                    .padding(padding),
-            onItemClick = onItemClick,
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TopBar(modifier: Modifier = Modifier) {
-    CenterAlignedTopAppBar(title = { Text(text = "Топ 250 лучших фильмов") }, modifier = modifier)
 }
 
 @Composable
 private fun MoviePagingList(
     modifier: Modifier = Modifier,
     pagingItems: LazyPagingItems<Movie>,
-    onItemClick: (movieId: Int) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -82,16 +67,20 @@ private fun MoviePagingList(
             MovieListCard(
                 movieItem = item!!,
                 modifier = Modifier.fillMaxWidth(),
-                onItemClick = onItemClick
+                onItemClick = { id ->
+                    scope.launch {
+                        NavigationChannel.sendEvent(NavigationEvent.OnItemClick(id))
+                    }
+                }
             )
         }
         pagingItems.loadState.refresh.let { loadState ->
             if (loadState is LoadState.Error) {
                 item {
                     ErrorScreen(
-                        modifier = Modifier,
+                        modifier = Modifier.fillMaxSize(),
                         onAction = { pagingItems.retry() },
-                        error = loadState.error.message ?: "",
+                        error = "Отсутствует интернет",
                     )
                 }
             } else if (loadState is LoadState.Loading) {
@@ -106,7 +95,7 @@ private fun MoviePagingList(
                     ErrorScreen(
                         modifier = Modifier,
                         onAction = { pagingItems.retry() },
-                        error = "ошибка",
+                        error = "Ошибка загрузки списка",
                     )
                 }
             }
@@ -123,13 +112,13 @@ private fun ErrorScreen(
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = error)
+            Spacer(Modifier.height(8.dp))
             Button(onClick = onAction) {
                 Text(text = "Обновить")
             }
         }
     }
 }
-
 
 
 @Preview

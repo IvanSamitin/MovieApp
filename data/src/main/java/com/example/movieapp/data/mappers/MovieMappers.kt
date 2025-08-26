@@ -5,6 +5,7 @@ import com.example.movieapp.data.api.models.GenresDTO
 import com.example.movieapp.data.api.models.MovieDTO
 import com.example.movieapp.data.api.models.ProductionStatusDTO
 import com.example.movieapp.data.api.models.TypeDTO
+import com.example.movieapp.data.local.entity.FullMovieEntity
 import com.example.movieapp.data.local.entity.MovieEntity
 import com.example.movieapp.data.local.entity.ProductionStatusEntity
 import com.example.movieapp.data.local.entity.TypeEntity
@@ -34,6 +35,7 @@ internal fun MovieDTO.toMovie(): Movie =
         ratingAwaitCount = ratingAwaitCount,
         ratingRfCritics = ratingRfCritics,
         ratingRfCriticsVoteCount = ratingRfCriticsVoteCount,
+        webUrl = webUrl,
         year = year,
         filmLength = filmLength,
         slogan = slogan,
@@ -73,7 +75,7 @@ internal fun MovieDTO.toMovie(): Movie =
 
 internal fun MovieDTO.toMovieEntity(): MovieEntity =
     MovieEntity(
-        kinopoiskId = kinopoiskId,
+        kinopoiskId = kinopoiskId!!,
         nameRu = nameRu,
         nameOriginal = nameOriginal,
         posterUrl = posterUrl,
@@ -93,6 +95,67 @@ internal fun MovieDTO.toMovieEntity(): MovieEntity =
         ratingAwaitCount = ratingAwaitCount,
         ratingRfCritics = ratingRfCritics,
         ratingRfCriticsVoteCount = ratingRfCriticsVoteCount,
+        webUrl = webUrl,
+        year = year,
+        filmLength = filmLength,
+        slogan = slogan,
+        description = description,
+        shortDescription = shortDescription,
+        editorAnnotation = editorAnnotation,
+        isTicketsAvailable = isTicketsAvailable,
+        productionStatus =
+            when (productionStatus) {
+                ProductionStatusDTO.FILMING -> ProductionStatusEntity.FILMING
+                ProductionStatusDTO.PRE_PRODUCTION -> ProductionStatusEntity.PRE_PRODUCTION
+                ProductionStatusDTO.COMPLETED -> ProductionStatusEntity.COMPLETED
+                ProductionStatusDTO.ANNOUNCED -> ProductionStatusEntity.ANNOUNCED
+                ProductionStatusDTO.UNKNOWN -> ProductionStatusEntity.UNKNOWN
+                ProductionStatusDTO.POST_PRODUCTION -> ProductionStatusEntity.POST_PRODUCTION
+                null -> ProductionStatusEntity.UNKNOWN
+            },
+        type =
+            when (type) {
+                TypeDTO.FILM -> TypeEntity.FILM
+                TypeDTO.TV_SERIES -> TypeEntity.TV_SERIES
+                TypeDTO.MINI_SERIES -> TypeEntity.MINI_SERIES
+                TypeDTO.TV_SHOW -> TypeEntity.TV_SHOW
+                TypeDTO.VIDEO -> TypeEntity.VIDEO
+                else -> TypeEntity.FILM
+            },
+        ratingMpaa = ratingMpaa,
+        ratingAgeLimits = ratingAgeLimits,
+        countries = countries?.mapNotNull { it.country } ?: emptyList(),
+        genres = genres?.mapNotNull { it.genre } ?: emptyList(),
+        startYear = startYear,
+        endYear = endYear,
+        serial = serial,
+        shortFilm = shortFilm,
+        completed = completed,
+    )
+
+internal fun MovieDTO.toFullMovieEntity(): FullMovieEntity =
+    FullMovieEntity(
+        kinopoiskId = kinopoiskId!!,
+        nameRu = nameRu,
+        nameOriginal = nameOriginal,
+        posterUrl = posterUrl,
+        posterUrlPreview = posterUrlPreview,
+        coverUrl = coverUrl,
+        logoUrl = logoUrl,
+        reviewsCount = reviewsCount,
+        ratingGoodReview = ratingGoodReview,
+        ratingGoodReviewVoteCount = ratingGoodReviewVoteCount,
+        ratingKinopoisk = ratingKinopoisk,
+        ratingKinopoiskVoteCount = ratingKinopoiskVoteCount,
+        ratingImdb = ratingImdb,
+        ratingImdbVoteCount = ratingImdbVoteCount,
+        ratingFilmCritics = ratingFilmCritics,
+        ratingFilmCriticsVoteCount = ratingFilmCriticsVoteCount,
+        ratingAwait = ratingAwait,
+        ratingAwaitCount = ratingAwaitCount,
+        ratingRfCritics = ratingRfCritics,
+        ratingRfCriticsVoteCount = ratingRfCriticsVoteCount,
+        webUrl = webUrl,
         year = year,
         filmLength = filmLength,
         slogan = slogan,
@@ -152,6 +215,7 @@ internal fun MovieEntity.toMovieDto(): MovieDTO =
         ratingAwaitCount = ratingAwaitCount,
         ratingRfCritics = ratingRfCritics,
         ratingRfCriticsVoteCount = ratingRfCriticsVoteCount,
+        webUrl = webUrl,
         year = year,
         filmLength = filmLength,
         slogan = slogan,
@@ -182,7 +246,7 @@ internal fun MovieEntity.toMovieDto(): MovieDTO =
         ratingMpaa = ratingMpaa,
         ratingAgeLimits = ratingAgeLimits,
         countries = countries?.map { CountriesDTO(it) },
-        genres = genres?.map{ GenresDTO(it)},
+        genres = genres?.map { GenresDTO(it) },
         startYear = startYear,
         endYear = endYear,
         serial = serial,
@@ -213,6 +277,7 @@ internal fun MovieEntity.toMovie(): Movie =
         ratingAwaitCount = ratingAwaitCount,
         ratingRfCritics = ratingRfCritics,
         ratingRfCriticsVoteCount = ratingRfCriticsVoteCount,
+        webUrl = webUrl,
         year = year,
         filmLength = filmLength,
         slogan = slogan,
@@ -250,3 +315,47 @@ internal fun MovieEntity.toMovie(): Movie =
         shortFilm = shortFilm,
         completed = completed,
     )
+
+internal fun FullMovieEntity.toMovieEntity(): MovieEntity =
+    MovieEntity(
+        kinopoiskId = kinopoiskId,
+        nameRu = nameRu,
+        nameOriginal = nameOriginal,
+        posterUrl = posterUrl,
+        posterUrlPreview = posterUrlPreview,
+        coverUrl = coverUrl,
+        logoUrl = logoUrl,
+        reviewsCount = reviewsCount,
+        ratingGoodReview = ratingGoodReview,
+        ratingGoodReviewVoteCount = ratingGoodReviewVoteCount,
+        ratingKinopoisk = ratingKinopoisk,
+        ratingKinopoiskVoteCount = ratingKinopoiskVoteCount,
+        ratingImdb = ratingImdb,
+        ratingImdbVoteCount = ratingImdbVoteCount,
+        ratingFilmCritics = ratingFilmCritics,
+        ratingFilmCriticsVoteCount = ratingFilmCriticsVoteCount,
+        ratingAwait = ratingAwait,
+        ratingAwaitCount = ratingAwaitCount,
+        ratingRfCritics = ratingRfCritics,
+        ratingRfCriticsVoteCount = ratingRfCriticsVoteCount,
+        webUrl = webUrl,
+        year = year,
+        filmLength = filmLength,
+        slogan = slogan,
+        description = description,
+        shortDescription = shortDescription,
+        editorAnnotation = editorAnnotation,
+        isTicketsAvailable = isTicketsAvailable,
+        productionStatus = productionStatus,
+        type = type,
+        ratingMpaa = ratingMpaa,
+        ratingAgeLimits = ratingAgeLimits,
+        countries = countries,
+        genres = genres,
+        startYear = startYear,
+        endYear = endYear,
+        serial = serial,
+        shortFilm = shortFilm,
+        completed = completed,
+    )
+

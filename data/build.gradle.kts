@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.google.gms.google.services)
+
 }
 
 android {
@@ -60,7 +60,8 @@ android {
 
 dependencies {
     implementation(project(":domain"))
-    implementation(libs.firebase.messaging)
+    implementation(libs.workmanager)
+
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
@@ -69,6 +70,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.koin.android)
+    implementation(libs.koin.android.workmanager)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)
