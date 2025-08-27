@@ -3,7 +3,6 @@ package com.example.movieapp.app
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -15,16 +14,11 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.movieapp.app.navigation.BottomNavigationListItem
 import com.example.movieapp.app.navigation.NavHostContainer
-import com.example.movieapp.app.navigation.Screens
 import com.example.movieapp.presentation.ui.theme.MovieAppTheme
 
 class MainActivity : ComponentActivity() {

@@ -14,7 +14,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.movieapp.app.navigation.Screens
 import com.example.movieapp.app.util.ObserveAsEvents
 import com.example.movieapp.presentation.featureHome.HomeRoot
 import com.example.movieapp.presentation.featureMovieDetail.MovieDetailsRoot
