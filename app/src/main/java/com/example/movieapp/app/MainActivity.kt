@@ -19,6 +19,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.movieapp.app.navigation.BottomNavigationListItem
 import com.example.movieapp.app.navigation.NavHostContainer
@@ -31,10 +33,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MovieAppTheme {
-                val navController = rememberNavController()
-                var selectedItemIndex by rememberSaveable {
-                    mutableIntStateOf(0)
-                }
+                val rootNavController = rememberNavController()
 
                 val notificationPermissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestPermission(),
@@ -43,19 +42,17 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(bottomBar = {
                     NavigationBar {
-                        val navBackStackEntry by navController.currentBackStackEntryFlow.collectAsStateWithLifecycle(
-                            null
-                        )
+                        val navBackStackEntry by rootNavController.currentBackStackEntryAsState()
                         val currentRoute = navBackStackEntry?.destination?.route
 
                         BottomNavigationListItem.bottomItems.forEachIndexed { index, item ->
-                            NavigationBarItem(
-                                selected = currentRoute == item.route,
+                            val isSelected = currentRoute == item.route
+                                NavigationBarItem(
+                                selected = isSelected,
                                 onClick = {
-                                    selectedItemIndex = index
-                                    navController.navigate(item.route) {
+                                    rootNavController.navigate(item.route) {
                                         launchSingleTop = true
-                                        popUpTo(navController.graph.startDestinationId) {
+                                        popUpTo(rootNavController.graph.findStartDestination().id) {
                                             saveState = true
                                         }
                                         restoreState = true
@@ -66,7 +63,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 icon = {
                                     Icon(
-                                        imageVector = if (index == selectedItemIndex) {
+                                        imageVector = if (isSelected) {
                                             item.selectedIcon
                                         } else item.unselectedIcon,
                                         contentDescription = item.title
@@ -76,12 +73,12 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }) { innerPadding ->
-                    NavHostContainer(navController = navController, padding = innerPadding)
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                        notificationPermissionLauncher.launch(
-//                            Manifest.permission.POST_NOTIFICATIONS
-//                        )
-//                    }
+                    NavHostContainer(navController = rootNavController, padding = innerPadding)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        notificationPermissionLauncher.launch(
+                            Manifest.permission.POST_NOTIFICATIONS
+                        )
+                    }
                 }
             }
         }

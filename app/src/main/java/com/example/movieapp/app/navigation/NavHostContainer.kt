@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.movieapp.app.navigation.Screens
 import com.example.movieapp.app.util.ObserveAsEvents
@@ -32,20 +33,7 @@ fun NavHostContainer(
     navController: NavHostController,
     padding: PaddingValues
 ) {
-    ObserveAsEvents(NavigationChannel.navigationEventsChannelFlow) { event ->
-        when (event) {
-            is NavigationEvent.OnItemClick -> navController.navigate(
-                Screens.MovieDetailsScreen(
-                    movieId = event.id
-                )
-            )
-            is NavigationEvent.OnCategoryClick -> navController.navigate(
-                Screens.MovieListScreen(
-                    category = event.category
-                )
-            )
-        }
-    }
+
     NavHost(
         navController = navController,
         startDestination = Screens.HomeScreen,
@@ -54,6 +42,37 @@ fun NavHostContainer(
             .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
 
     ) {
+        composable<Screens.HomeScreen> {
+            HomeNavHost()
+        }
+        composable<Screens.SearchScreen> {
+            SearchNavHost()
+        }
+        composable<Screens.FavScreen> {
+            FavNavHost()
+        }
+    }
+}
+
+@Composable
+fun HomeNavHost() {
+    val homeNavController = rememberNavController()
+    ObserveAsEvents(NavigationChannel.navigationEventsChannelFlow) { event ->
+        when (event) {
+            is NavigationEvent.OnItemClick -> homeNavController.navigate(
+                Screens.MovieDetailsScreen(
+                    movieId = event.id
+                )
+            )
+
+            is NavigationEvent.OnCategoryClick -> homeNavController.navigate(
+                Screens.MovieListScreen(
+                    category = event.category
+                )
+            )
+        }
+    }
+    NavHost(homeNavController, startDestination = Screens.HomeScreen) {
         composable<Screens.HomeScreen> {
             HomeRoot()
         }
@@ -65,18 +84,74 @@ fun NavHostContainer(
                 viewModel = viewModel
             )
         }
+                composable<Screens.MovieDetailsScreen> {
+            val args = it.toRoute<Screens.MovieDetailsScreen>()
+            val viewModel: MovieDetailsViewModel =
+                koinViewModel<MovieDetailsViewModel>(parameters = { parametersOf(args.movieId) })
+            MovieDetailsRoot(viewModel)
+        }
+    }
+}
+
+@Composable
+fun SearchNavHost() {
+    val searchNavController = rememberNavController()
+    ObserveAsEvents(NavigationChannel.navigationEventsChannelFlow) { event ->
+        when (event) {
+            is NavigationEvent.OnItemClick -> searchNavController.navigate(
+                Screens.MovieDetailsScreen(
+                    movieId = event.id
+                )
+            )
+
+            is NavigationEvent.OnCategoryClick -> searchNavController.navigate(
+                Screens.MovieListScreen(
+                    category = event.category
+                )
+            )
+        }
+    }
+    NavHost(searchNavController, startDestination = Screens.SearchScreen) {
+        composable<Screens.SearchScreen> {
+            SearchRoot()
+        }
         composable<Screens.MovieDetailsScreen> {
             val args = it.toRoute<Screens.MovieDetailsScreen>()
             val viewModel: MovieDetailsViewModel =
                 koinViewModel<MovieDetailsViewModel>(parameters = { parametersOf(args.movieId) })
             MovieDetailsRoot(viewModel)
         }
-        composable<Screens.SearchScreen>{
-            SearchRoot()
-        }
+    }
+}
 
+@Composable
+fun FavNavHost() {
+    val favNavController = rememberNavController()
+    ObserveAsEvents(NavigationChannel.navigationEventsChannelFlow) { event ->
+        when (event) {
+            is NavigationEvent.OnItemClick -> favNavController.navigate(
+                Screens.MovieDetailsScreen(
+                    movieId = event.id
+                )
+            )
+
+            is NavigationEvent.OnCategoryClick -> favNavController.navigate(
+                Screens.MovieListScreen(
+                    category = event.category
+                )
+            )
+        }
+    }
+    NavHost(favNavController, startDestination = Screens.FavScreen) {
         composable<Screens.FavScreen> {
             PersonalListRoot()
         }
+        composable<Screens.MovieDetailsScreen> {
+            val args = it.toRoute<Screens.MovieDetailsScreen>()
+            val viewModel: MovieDetailsViewModel =
+                koinViewModel<MovieDetailsViewModel>(parameters = { parametersOf(args.movieId) })
+            MovieDetailsRoot(viewModel)
+        }
     }
 }
+
