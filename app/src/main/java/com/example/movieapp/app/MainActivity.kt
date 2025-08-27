@@ -77,11 +77,11 @@ class MainActivity : ComponentActivity() {
                     }
                 }) { innerPadding ->
                     NavHostContainer(navController = navController, padding = innerPadding)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        notificationPermissionLauncher.launch(
-                            Manifest.permission.POST_NOTIFICATIONS
-                        )
-                    }
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                        notificationPermissionLauncher.launch(
+//                            Manifest.permission.POST_NOTIFICATIONS
+//                        )
+//                    }
                 }
             }
         }
