@@ -8,12 +8,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -24,6 +27,7 @@ import com.example.movieapp.presentation.ui.theme.MovieAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         enableEdgeToEdge()
         setContent {
             MovieAppTheme {
@@ -34,39 +38,42 @@ class MainActivity : ComponentActivity() {
                     onResult = {}
                 )
 
-                Scaffold(bottomBar = {
-                    NavigationBar {
-                        val navBackStackEntry by rootNavController.currentBackStackEntryAsState()
-                        val currentRoute = navBackStackEntry?.destination?.route
+                Scaffold(
+                    bottomBar = {
+                        NavigationBar {
+                            val navBackStackEntry by rootNavController.currentBackStackEntryAsState()
+                            val currentRoute = navBackStackEntry?.destination?.route
 
-                        BottomNavigationListItem.bottomItems.forEachIndexed { index, item ->
-                            val isSelected = currentRoute == item.route
+                            BottomNavigationListItem.bottomItems.forEachIndexed { index, item ->
+                                val isSelected = currentRoute == item.route
                                 NavigationBarItem(
-                                selected = isSelected,
-                                onClick = {
-                                    rootNavController.navigate(item.route) {
-                                        launchSingleTop = true
-                                        popUpTo(rootNavController.graph.findStartDestination().id) {
-                                            saveState = true
+                                    selected = isSelected,
+                                    onClick = {
+                                        rootNavController.navigate(item.route) {
+                                            launchSingleTop = true
+                                            popUpTo(rootNavController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            restoreState = true
                                         }
-                                        restoreState = true
+                                    },
+                                    label = {
+                                        Text(text = item.title)
+                                    },
+                                    icon = {
+                                        Icon(
+                                            imageVector = if (isSelected) {
+                                                item.selectedIcon
+                                            } else item.unselectedIcon,
+                                            contentDescription = item.title
+                                        )
                                     }
-                                },
-                                label = {
-                                    Text(text = item.title)
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (isSelected) {
-                                            item.selectedIcon
-                                        } else item.unselectedIcon,
-                                        contentDescription = item.title
-                                    )
-                                }
-                            )
+                                )
+                            }
                         }
-                    }
-                }) { innerPadding ->
+                    },
+                contentWindowInsets = WindowInsets.safeDrawing
+                ) { innerPadding ->
                     NavHostContainer(navController = rootNavController, padding = innerPadding)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         notificationPermissionLauncher.launch(

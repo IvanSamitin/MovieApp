@@ -1,12 +1,7 @@
 package com.example.movieapp.app.navigation
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -35,19 +30,18 @@ fun NavHostContainer(
 
     NavHost(
         navController = navController,
-        startDestination = Screens.HomeScreen,
+        startDestination = "Home",
         modifier = Modifier
             .padding(padding)
-            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
 
     ) {
-        composable<Screens.HomeScreen> {
+        composable("Home") {
             HomeNavHost()
         }
-        composable<Screens.SearchScreen> {
+        composable("Search") {
             SearchNavHost()
         }
-        composable<Screens.FavScreen> {
+        composable("Favorite") {
             FavNavHost()
         }
     }
@@ -83,7 +77,7 @@ fun HomeNavHost() {
                 viewModel = viewModel
             )
         }
-                composable<Screens.MovieDetailsScreen> {
+        composable<Screens.MovieDetailsScreen> {
             val args = it.toRoute<Screens.MovieDetailsScreen>()
             val viewModel: MovieDetailsViewModel =
                 koinViewModel<MovieDetailsViewModel>(parameters = { parametersOf(args.movieId) })

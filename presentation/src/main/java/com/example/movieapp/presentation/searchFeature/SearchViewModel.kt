@@ -2,7 +2,6 @@ package com.example.movieapp.presentation.searchFeature
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.repository.MovieRepository
 import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result

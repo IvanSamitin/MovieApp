@@ -22,19 +22,19 @@ object BottomNavigationListItem {
             title = "Главное",
             selectedIcon = Icons.Filled.Home,
             unselectedIcon = Icons.Outlined.Home,
-            route = Screens.HomeScreen::class.qualifiedName!!
+            route = "Home"
         ),
         BottomNavigationItem(
             title = "Поиск",
             selectedIcon = Icons.Filled.Search,
             unselectedIcon = Icons.Outlined.Search,
-            route = Screens.SearchScreen::class.qualifiedName!!
+            route = "Search"
         ),
         BottomNavigationItem(
             title = "Любимые",
             selectedIcon = Icons.Filled.Favorite,
             unselectedIcon = Icons.Outlined.FavoriteBorder,
-            route = Screens.FavScreen::class.qualifiedName!!
+            route = "Favorite"
         ),
     )
 }

@@ -1,6 +1,5 @@
-
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
-import java.util.Properties
+
 
 
 plugins {
@@ -78,6 +77,7 @@ dependencies {
     implementation(libs.koin.android.workmanager)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation)
+    implementation(libs.androidx.core.splashscreen)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

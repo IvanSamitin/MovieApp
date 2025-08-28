@@ -27,7 +27,7 @@ android {
     }
 
     kotlin {
-        jvmToolchain(21) // или нужная тебе версия
+        jvmToolchain(21)
     }
 
     targetProjectPath = ":app"
