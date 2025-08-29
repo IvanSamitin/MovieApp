@@ -37,6 +37,7 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.movieapp.R
 import com.example.movieapp.domain.model.Movie
+import com.example.movieapp.domain.model.Type
 import com.example.movieapp.presentation.ui.theme.MovieAppTheme
 import com.example.movieapp.presentation.ui.uiComponents.LoadingIndicator
 import org.koin.androidx.compose.koinViewModel
@@ -152,10 +153,22 @@ private fun MovieCard(
                 )
             }
             Row {
-                Text(
-                    text = "${movieItem.year}, ",
-                    style = MaterialTheme.typography.labelLarge,
-                )
+                if (
+                    movieItem.type == Type.TV_SERIES &&
+                    movieItem.endYear != null &&
+                    movieItem.endYear != movieItem.startYear
+                ) {
+                    Text(
+                        text = "${movieItem.startYear} - ${movieItem.endYear}, ",
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                } else {
+                    Text(
+                        text = "${movieItem.year}, ",
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+
                 Text(
                     text = movieItem.genres?.first() ?: "",
                     style = MaterialTheme.typography.labelLarge,

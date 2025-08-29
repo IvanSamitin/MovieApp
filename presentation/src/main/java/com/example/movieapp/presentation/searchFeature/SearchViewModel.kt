@@ -7,6 +7,7 @@ import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
 import com.example.movieapp.presentation.util.NavigationChannel
 import com.example.movieapp.presentation.util.NavigationEvent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -71,9 +72,13 @@ class SearchViewModel(
     }
 
     private fun onSearchTextChange(text: String) {
-        _state.value = _state.value.copy(
-            searchText = text
-        )
+        viewModelScope.launch {
+            _state.value = _state.value.copy(
+                searchText = text
+            )
+            delay(1000)
+            searchMovie()
+        }
     }
 
     private fun onErrorAction() {
