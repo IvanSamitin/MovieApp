@@ -7,6 +7,7 @@ import com.example.movieapp.presentation.featureMovieDetail.MovieDetailsViewMode
 import com.example.movieapp.presentation.featureMovieList.MovieListViewModel
 import com.example.movieapp.presentation.personalListFeature.PersonalListViewModel
 import com.example.movieapp.presentation.searchFeature.SearchViewModel
+import com.example.movieapp.presentation.seasonOverviewFeature.SeasonOverviewViewModel
 import org.koin.androidx.workmanager.dsl.worker
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -30,6 +31,10 @@ val mainModule =
         }
         viewModel {
             PersonalListViewModel(get())
+        }
+
+        viewModel { (movieId: Int) ->
+            SeasonOverviewViewModel(movieRepository = get(), movieId = movieId)
         }
 
         worker { MovieSyncWorker(get(), get(), get()) }

@@ -7,4 +7,5 @@ data class MovieDetailsState(
     val isFavorite: Boolean = false,
     val loading: Boolean = true,
     val error: String? = null,
+    val isSheetOpen: Boolean = false,
 )

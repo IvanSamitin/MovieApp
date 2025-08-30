@@ -23,4 +23,9 @@ sealed interface Screens {
 
     @Serializable
     data object FavScreen : Screens
+
+    @Serializable
+    data class SeasonOverviewScreen(
+        val movieId: Int
+    ) : Screens
 }

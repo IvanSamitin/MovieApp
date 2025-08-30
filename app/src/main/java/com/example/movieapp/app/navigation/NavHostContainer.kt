@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.movieapp.app.navigation.Screens.*
 import com.example.movieapp.app.util.ObserveAsEvents
 import com.example.movieapp.presentation.featureHome.HomeRoot
 import com.example.movieapp.presentation.featureMovieDetail.MovieDetailsRoot
@@ -17,6 +18,9 @@ import com.example.movieapp.presentation.featureMovieList.MovieListRoot
 import com.example.movieapp.presentation.featureMovieList.MovieListViewModel
 import com.example.movieapp.presentation.personalListFeature.PersonalListRoot
 import com.example.movieapp.presentation.searchFeature.SearchRoot
+import com.example.movieapp.presentation.seasonOverviewFeature.SeasonOverviewRoot
+import com.example.movieapp.presentation.seasonOverviewFeature.SeasonOverviewScreen
+import com.example.movieapp.presentation.seasonOverviewFeature.SeasonOverviewViewModel
 import com.example.movieapp.presentation.util.NavigationChannel
 import com.example.movieapp.presentation.util.NavigationEvent
 import org.koin.androidx.compose.koinViewModel
@@ -53,15 +57,21 @@ fun HomeNavHost() {
     ObserveAsEvents(NavigationChannel.navigationEventsChannelFlow) { event ->
         when (event) {
             is NavigationEvent.OnItemClick -> homeNavController.navigate(
-                Screens.MovieDetailsScreen(
+                MovieDetailsScreen(
                     movieId = event.id
                 )
             )
 
             is NavigationEvent.OnCategoryClick -> homeNavController.navigate(
-                Screens.MovieListScreen(
+                MovieListScreen(
                     category = event.category
                 )
+            )
+
+            is NavigationEvent.OnNavigateBack -> homeNavController.navigateUp()
+
+            is NavigationEvent.OnSeasonOverviewClick -> homeNavController.navigate(
+                Screens.SeasonOverviewScreen(movieId = event.id)
             )
         }
     }
@@ -83,6 +93,13 @@ fun HomeNavHost() {
                 koinViewModel<MovieDetailsViewModel>(parameters = { parametersOf(args.movieId) })
             MovieDetailsRoot(viewModel)
         }
+
+        composable<Screens.SeasonOverviewScreen> {
+            val args = it.toRoute<Screens.SeasonOverviewScreen>()
+            val viewModel: SeasonOverviewViewModel =
+                koinViewModel<SeasonOverviewViewModel>(parameters = { parametersOf(args.movieId) })
+            SeasonOverviewRoot(viewModel)
+        }
     }
 }
 
@@ -102,6 +119,12 @@ fun SearchNavHost() {
                     category = event.category
                 )
             )
+
+            is NavigationEvent.OnNavigateBack -> searchNavController.navigateUp()
+
+            is NavigationEvent.OnSeasonOverviewClick -> searchNavController.navigate(
+                Screens.SeasonOverviewScreen(movieId = event.id)
+            )
         }
     }
     NavHost(searchNavController, startDestination = Screens.SearchScreen) {
@@ -114,6 +137,12 @@ fun SearchNavHost() {
                 koinViewModel<MovieDetailsViewModel>(parameters = { parametersOf(args.movieId) })
             MovieDetailsRoot(viewModel)
         }
+        composable<Screens.SeasonOverviewScreen> {
+            val args = it.toRoute<Screens.SeasonOverviewScreen>()
+            val viewModel: SeasonOverviewViewModel =
+                koinViewModel<SeasonOverviewViewModel>(parameters = { parametersOf(args.movieId) })
+            SeasonOverviewRoot(viewModel)
+        }
     }
 }
 
@@ -123,15 +152,21 @@ fun FavNavHost() {
     ObserveAsEvents(NavigationChannel.navigationEventsChannelFlow) { event ->
         when (event) {
             is NavigationEvent.OnItemClick -> favNavController.navigate(
-                Screens.MovieDetailsScreen(
+                MovieDetailsScreen(
                     movieId = event.id
                 )
             )
 
             is NavigationEvent.OnCategoryClick -> favNavController.navigate(
-                Screens.MovieListScreen(
+                MovieListScreen(
                     category = event.category
                 )
+            )
+
+            is NavigationEvent.OnNavigateBack -> favNavController.navigateUp()
+
+            is NavigationEvent.OnSeasonOverviewClick -> favNavController.navigate(
+                Screens.SeasonOverviewScreen(movieId = event.id)
             )
         }
     }
@@ -144,6 +179,12 @@ fun FavNavHost() {
             val viewModel: MovieDetailsViewModel =
                 koinViewModel<MovieDetailsViewModel>(parameters = { parametersOf(args.movieId) })
             MovieDetailsRoot(viewModel)
+        }
+        composable<Screens.SeasonOverviewScreen> {
+            val args = it.toRoute<Screens.SeasonOverviewScreen>()
+            val viewModel: SeasonOverviewViewModel =
+                koinViewModel<SeasonOverviewViewModel>(parameters = { parametersOf(args.movieId) })
+            SeasonOverviewRoot(viewModel)
         }
     }
 }

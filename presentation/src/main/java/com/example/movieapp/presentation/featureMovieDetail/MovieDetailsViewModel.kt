@@ -6,6 +6,8 @@ import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.domain.repository.MovieRepository
 import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
+import com.example.movieapp.presentation.util.NavigationChannel
+import com.example.movieapp.presentation.util.NavigationEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -75,10 +77,34 @@ class MovieDetailsViewModel(
         }
     }
 
+    private fun updateSheet() {
+        _state.value = state.value.copy(
+            isSheetOpen = !state.value.isSheetOpen
+        )
+    }
+
+    private fun sendNavigationEvent(event: NavigationEvent) {
+        viewModelScope.launch {
+            NavigationChannel.sendEvent(event = event)
+        }
+    }
+
     fun onAction(action: MovieDetailsAction) {
         when (action) {
             is MovieDetailsAction.Update -> getMovieDetails(movieId)
             is MovieDetailsAction.AddToFav -> addToFavorite(movieId)
+            is MovieDetailsAction.SheetUpdate -> updateSheet()
+            is MovieDetailsAction.NavigateBack -> sendNavigationEvent(
+                NavigationEvent.OnNavigateBack
+            )
+
+            is MovieDetailsAction.SeasonOverview -> sendNavigationEvent(
+                NavigationEvent.OnSeasonOverviewClick(
+                    action.movieId
+                )
+            )
         }
     }
+
+
 }
