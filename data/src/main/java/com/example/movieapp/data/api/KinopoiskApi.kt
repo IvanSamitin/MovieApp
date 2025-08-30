@@ -2,6 +2,7 @@ package com.example.movieapp.data.api
 
 import com.example.movieapp.data.api.models.FilmCollectionResponseDTO
 import com.example.movieapp.data.api.models.MovieDTO
+import com.example.movieapp.data.api.models.SeasonResponseDTO
 import com.example.movieapp.domain.model.MovieCategory
 import retrofit2.Response
 import retrofit2.http.GET
@@ -25,4 +26,9 @@ interface KinopoiskApi {
         @Query("keyword") keyword: String? = "",
         @Query("page") page: Int = 1,
     ): FilmCollectionResponseDTO
+
+    @GET("/api/v2.2/films/{movieId}/seasons")
+    suspend fun getSeasonOverview(
+        @Path("movieId") movieId: Int,
+    ): SeasonResponseDTO
 }

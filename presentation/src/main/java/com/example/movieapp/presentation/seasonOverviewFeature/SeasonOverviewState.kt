@@ -1,6 +1,9 @@
 package com.example.movieapp.presentation.seasonOverviewFeature
 
+import com.example.movieapp.domain.model.Season
+
 data class SeasonOverviewState(
-    val paramOne: String = "default",
-    val paramTwo: List<String> = emptyList(),
+    val loading: Boolean = false,
+    val error: String = "",
+    val season: List<Season> = emptyList(),
 )

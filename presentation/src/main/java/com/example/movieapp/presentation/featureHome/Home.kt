@@ -33,7 +33,9 @@ import androidx.compose.material3.carousel.CarouselState
 import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -118,7 +120,6 @@ fun HomeScreen(
                     movieCategory = MovieCategory.COMICS_THEME,
                 )
             }
-
         }
     }
 }
@@ -146,6 +147,13 @@ private fun PopularNow(
     listMovie: List<Movie>,
     onAction: (HomeAction) -> Unit,
 ) {
+
+    val carouselState = remember(listMovie.size) {
+        CarouselState(
+            itemCount = { listMovie.size },
+            currentItem = 0
+        )
+    }
     Column(modifier = modifier) {
         Text(
             text = "Самые популярные фильмы",
@@ -153,12 +161,7 @@ private fun PopularNow(
             modifier = Modifier.padding(horizontal = 8.dp)
         )
         HorizontalUncontainedCarousel(
-            state = remember(listMovie.size) {
-                CarouselState(
-                    itemCount = { listMovie.size },
-                    currentItem = 0
-                )
-            },
+            state = carouselState,
             itemWidth = 235.dp,
             itemSpacing = 4.dp,
             contentPadding = PaddingValues(horizontal = 8.dp)
@@ -167,7 +170,6 @@ private fun PopularNow(
             CarouselItem(movieItem = item, onAction = onAction)
         }
     }
-
 }
 
 @Composable

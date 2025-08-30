@@ -12,9 +12,11 @@ import com.example.movieapp.data.local.entity.MovieMovieListCrossRef
 import com.example.movieapp.data.mappers.toFullMovieEntity
 import com.example.movieapp.data.mappers.toMovie
 import com.example.movieapp.data.mappers.toMovieEntity
+import com.example.movieapp.data.mappers.toSeason
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.domain.model.MovieDetails
+import com.example.movieapp.domain.model.Season
 import com.example.movieapp.domain.repository.MovieRepository
 import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
@@ -199,47 +201,17 @@ class MovieRepositoryImpl(
             }
         }
 
+    override suspend fun getSeasonOverview(movieId: Int): Result<List<Season>, DataError.Network> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.getSeasonOverview(movieId = movieId)
+                Result.Success(response.items.map { it.toSeason() })
+            } catch (e: IOException) {
+                Result.Error(DataError.Network.NO_INTERNET)
+            }
+        }
+
     companion object {
         const val TTL: Long = 24 * 60 * 60 * 1000
     }
 }
-
-//override fun getMovieDetails(movieId: Int): Flow<Result<MovieDetails, DataError.Network>> =
-//    flow {
-//        val now = System.currentTimeMillis()
-//        val localMovie = dao.getFullMovie(movieId).firstOrNull()
-//        val isActual = localMovie?.let {
-//            now - it.lastUpdated < TTL
-//        } ?: false
-//        if (localMovie != null && isActual) {
-//            isMovieInList(movieId, MovieCategory.FAVORITE).collect { isInFavorites ->
-//                emit(
-//                    Result.Success<MovieDetails, DataError.Network>(
-//                        MovieDetails(
-//                            movie = localMovie.toMovieEntity().toMovie(),
-//                            isInFavorites = isInFavorites
-//                        )
-//                    )
-//                )
-//            }
-//        } else {
-//            try {
-//                val dto = api.getMovieDetail(movieId)
-//                dao.upsertFullMovieItem(dto.toFullMovieEntity())
-//                isMovieInList(movieId, MovieCategory.FAVORITE).collect { isInFavorites ->
-//                    emit(
-//                        Result.Success(
-//                            MovieDetails(
-//                                movie = dto.toMovie(),
-//                                isInFavorites = isInFavorites
-//                            )
-//                        )
-//                    )
-//                }
-//            } catch (e: IOException) {
-//                emit(
-//                    Result.Error(DataError.Network.NO_INTERNET)
-//                )
-//            }
-//        }
-//    }.flowOn(Dispatchers.IO)

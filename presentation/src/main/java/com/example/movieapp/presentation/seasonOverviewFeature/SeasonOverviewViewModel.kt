@@ -3,10 +3,15 @@ package com.example.movieapp.presentation.seasonOverviewFeature
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.domain.repository.MovieRepository
+import com.example.movieapp.domain.resultLogic.DataError
+import com.example.movieapp.domain.resultLogic.Result
+import com.example.movieapp.presentation.util.NavigationChannel
+import com.example.movieapp.presentation.util.NavigationEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class SeasonOverviewViewModel(
     private val movieRepository: MovieRepository,
@@ -19,7 +24,7 @@ class SeasonOverviewViewModel(
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
-                /** Load initial data here **/
+                getSeasonOverview(movieId)
                 hasLoadedInitialData = true
             }
         }
@@ -29,9 +34,40 @@ class SeasonOverviewViewModel(
             initialValue = SeasonOverviewState()
         )
 
+    private fun getSeasonOverview(movieId: Int) {
+        viewModelScope.launch {
+            _state.value = state.value.copy(
+                loading = true
+            )
+
+            val response = movieRepository.getSeasonOverview(movieId)
+            when (response) {
+                is Result.Error -> {
+                    _state.value = state.value.copy(
+                        loading = false,
+                        error = when (response.error) {
+                            DataError.Network.NO_INTERNET -> "Нет интернета"
+                            DataError.Network.SERVER_ERROR -> "Ошибка сервера"
+                        }
+                    )
+                }
+
+                is Result.Success -> _state.value =
+                    state.value.copy(season = response.data, loading = false, error = "")
+            }
+        }
+    }
+
+    private fun navigateBack() {
+        viewModelScope.launch {
+            NavigationChannel.sendEvent(NavigationEvent.OnNavigateBack)
+        }
+    }
+
     fun onAction(action: SeasonOverviewAction) {
         when (action) {
-            else -> {}
+            is SeasonOverviewAction.NavigateBack -> navigateBack()
+            is SeasonOverviewAction.Retry -> getSeasonOverview(movieId)
         }
     }
 

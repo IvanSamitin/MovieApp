@@ -5,6 +5,7 @@ import androidx.paging.PagingData
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.domain.model.MovieDetails
+import com.example.movieapp.domain.model.Season
 import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
 import kotlinx.coroutines.flow.Flow
@@ -27,5 +28,5 @@ interface MovieRepository {
 
     suspend fun addToList(movieId: Int, category: MovieCategory)
 
-
+    suspend fun getSeasonOverview(movieId: Int): Result<List<Season>, DataError.Network>
 }
