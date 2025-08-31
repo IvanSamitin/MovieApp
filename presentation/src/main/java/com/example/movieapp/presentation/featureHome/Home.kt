@@ -1,5 +1,6 @@
 package com.example.movieapp.presentation.featureHome
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -84,13 +85,18 @@ fun HomeScreen(
             ErrorStateHome(modifier = Modifier.padding(), onAction = onAction, state.error)
         }
 
-        state.movieCollection != null -> {
+        state.movieCollection.isNotEmpty() -> {
             Column(
                 modifier = Modifier
                     .verticalScroll(scrollState)
                     .fillMaxSize()
 
             ) {
+                AnimatedVisibility(!state.isConnected) {
+                    Box(modifier = Modifier.background(color = MaterialTheme.colorScheme.error).fillMaxWidth().padding(6.dp)) {
+                        Text(text = "Нет интернета", modifier = Modifier.align(Alignment.Center), style = MaterialTheme.typography.titleLarge)
+                    }
+                }
                 PopularNow(
                     listMovie = state.movieCollection[MovieCategory.TOP_POPULAR_ALL]
                         ?: emptyList(),

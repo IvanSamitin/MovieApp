@@ -7,4 +7,5 @@ data class HomeState(
     val movieCollection: Map<MovieCategory, List<Movie>> = emptyMap(),
     val loading: Boolean = true,
     val error: String? = null,
+    val isConnected: Boolean = false
 )

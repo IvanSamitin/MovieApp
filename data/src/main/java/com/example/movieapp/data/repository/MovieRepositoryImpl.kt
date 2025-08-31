@@ -16,7 +16,9 @@ import com.example.movieapp.data.mappers.toSeason
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.domain.model.MovieDetails
+import com.example.movieapp.domain.model.Order
 import com.example.movieapp.domain.model.Season
+import com.example.movieapp.domain.model.Type
 import com.example.movieapp.domain.repository.MovieRepository
 import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
@@ -33,6 +35,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okio.IOException
+import retrofit2.http.Query
 
 class MovieRepositoryImpl(
     private val api: KinopoiskApi,
@@ -189,10 +192,21 @@ class MovieRepositoryImpl(
             else -> DataError.Network.SERVER_ERROR
         }
 
-    override suspend fun searchMovie(keyword: String): Result<List<Movie>, DataError.Network> =
+    override suspend fun searchMovie(
+        keyword: String,
+        ratingFrom: Float,
+        ratingTo: Float,
+        order: Order?,
+        type: Type?,
+    ): Result<List<Movie>, DataError.Network> =
         withContext(Dispatchers.IO) {
             try {
-                val dto = api.searchMovie(keyword = keyword)
+                val dto = api.searchMovie(
+                    keyword = keyword, ratingFrom = ratingFrom,
+                    ratingTo = ratingTo,
+                    order = order,
+                    type = type,
+                )
                 dao.upsertMovieList(dto.items.map { it.toMovieEntity() })
                 Result.Success(dto.items.map { it.toMovie() })
 

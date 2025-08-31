@@ -1,7 +1,9 @@
 package com.example.movieapp.presentation.seasonOverviewFeature
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,7 +58,7 @@ fun SeasonOverviewScreen(
             errorText = state.error
         )
 
-        state.season.isNotEmpty() -> SeasonList(seasons = state.season, onAction = onAction)
+        state.season.isNotEmpty() -> SeasonList(state = state, onAction = onAction)
         else -> {
             Box(modifier = Modifier.fillMaxSize()) {
                 Text(text = "Информация не найдена", modifier = Modifier.align(Alignment.Center))
@@ -67,13 +70,13 @@ fun SeasonOverviewScreen(
 @Composable
 private fun SeasonList(
     modifier: Modifier = Modifier,
-    seasons: List<Season>,
+    state: SeasonOverviewState,
     onAction: (SeasonOverviewAction) -> Unit
 ) {
     LazyColumn(
         modifier = modifier
     ) {
-        seasons.forEach { season ->
+        state.season.forEach { season ->
             stickyHeader {
                 Header(text = "${season.number} сезон", onAction = onAction)
             }
@@ -83,9 +86,11 @@ private fun SeasonList(
                         Text(text = "${episode.episodeNumber} ${episode.nameRu ?: "серия"}")
                     },
                     supportingContent = {
-                        episode.nameEn?.let {
-                            if (it.isNotBlank()) {
-                                Text(text = it)
+                        Column {
+                            episode.nameEn?.let {
+                                if (it.isNotBlank()) {
+                                    Text(text = it)
+                                }
                             }
 
                         }
@@ -94,7 +99,7 @@ private fun SeasonList(
                         episode.releaseDate?.let {
                             Text(text = it)
                         }
-                    }
+                    },
                 )
                 HorizontalDivider()
             }

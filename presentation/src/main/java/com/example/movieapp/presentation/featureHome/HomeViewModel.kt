@@ -6,6 +6,7 @@ import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.domain.repository.MovieRepository
 import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
+import com.example.movieapp.presentation.util.ConnectivityObserver
 import com.example.movieapp.presentation.util.NavigationChannel
 import com.example.movieapp.presentation.util.NavigationEvent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val movieRepository: MovieRepository,
+    private val connectivityObserver: ConnectivityObserver,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -25,6 +27,7 @@ class HomeViewModel(
         .onStart {
             if (!hasLoadedInitialData) {
                 loadData()
+                isConncted()
                 hasLoadedInitialData = true
             }
         }
@@ -40,7 +43,6 @@ class HomeViewModel(
         getCollection(movieCategory = MovieCategory.TOP_250_TV_SHOWS)
         getCollection(movieCategory = MovieCategory.COMICS_THEME)
     }
-
 
     private fun getCollection(movieCategory: MovieCategory) {
         viewModelScope.launch {
@@ -68,6 +70,16 @@ class HomeViewModel(
                             )
                     }
                 }
+            }
+        }
+    }
+
+    private suspend fun isConncted() {
+        viewModelScope.launch {
+            connectivityObserver.isConnected.collect {
+                _state.value = _state.value.copy(
+                    isConnected = it
+                )
             }
         }
     }
