@@ -36,5 +36,6 @@ interface MovieRepository {
 
     suspend fun addToList(movieId: Int, category: MovieCategory)
 
+    suspend fun getRandomListMovie(): Result<List<Movie>, DataError.Network>
     suspend fun getSeasonOverview(movieId: Int): Result<List<Season>, DataError.Network>
 }

@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.domain.repository.MovieRepository
-import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
 import com.example.movieapp.presentation.util.NavigationChannel
 import com.example.movieapp.presentation.util.NavigationEvent
+import com.example.movieapp.presentation.util.asErrorUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -37,19 +37,12 @@ class MovieDetailsViewModel(
     private fun getMovieDetails(movieId: Int) {
         viewModelScope.launch {
             movieRepository.getMovieDetails(movieId).collect { result ->
-
-
                 when (result) {
                     is Result.Error -> {
-                        val errorMessage =
-                            when (result.error) {
-                                DataError.Network.NO_INTERNET -> "Отсутсвует интернет"
-                                DataError.Network.SERVER_ERROR -> "Ошибка сервера"
-                            }
                         _state.value =
                             _state.value.copy(
                                 loading = false,
-                                error = errorMessage,
+                                error = result.asErrorUiText(),
                             )
                     }
 

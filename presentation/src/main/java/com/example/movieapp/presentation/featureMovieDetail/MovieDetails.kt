@@ -46,6 +46,7 @@ import com.example.movieapp.R
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.Type
 import com.example.movieapp.presentation.ui.theme.MovieAppTheme
+import com.example.movieapp.presentation.ui.uiComponents.ErrorState
 import com.example.movieapp.presentation.ui.uiComponents.LoadingIndicator
 import org.koin.androidx.compose.koinViewModel
 
@@ -70,7 +71,11 @@ fun MovieDetailsScreen(
         }
 
         state.error != null -> {
-            ErrorState(modifier = Modifier, onAction, state.error)
+            ErrorState(
+                modifier = Modifier,
+                onClick = { onAction(MovieDetailsAction.Update) },
+                state.error.asString()
+            )
         }
 
         state.movieDetails != null -> {
@@ -82,22 +87,6 @@ fun MovieDetailsScreen(
                     Modifier
                         .fillMaxWidth(),
             )
-        }
-    }
-}
-
-@Composable
-private fun ErrorState(
-    modifier: Modifier = Modifier,
-    onAction: (MovieDetailsAction) -> Unit,
-    errorText: String,
-) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Ошибка $errorText")
-            Button(onClick = { onAction(MovieDetailsAction.Update) }) {
-                Text(text = "Обновить")
-            }
         }
     }
 }
@@ -195,10 +184,12 @@ private fun MovieCard(
                         style = MaterialTheme.typography.labelLarge,
                     )
                 } else {
-                    Text(
-                        text = "${movieItem.year}, ",
-                        style = MaterialTheme.typography.labelLarge,
-                    )
+                    movieItem.year?.let {
+                        Text(
+                            text = "$it, ",
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
                 }
 
                 Text(
@@ -263,9 +254,12 @@ private fun MovieCard(
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
         )
-        TextButton(onClick = { onAction(MovieDetailsAction.SheetUpdate) }) {
-            Text(text = "Читать полностью")
+        movieItem.description?.let {
+            TextButton(onClick = { onAction(MovieDetailsAction.SheetUpdate) }) {
+                Text(text = "Читать полностью")
+            }
         }
+
 
         if (state.isSheetOpen) {
             ModalBottomSheet(

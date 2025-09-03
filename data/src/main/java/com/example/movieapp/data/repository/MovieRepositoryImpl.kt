@@ -41,6 +41,7 @@ class MovieRepositoryImpl(
     private val api: KinopoiskApi,
     private val dao: MovieDao
 ) : MovieRepository {
+
     override suspend fun getCollection(
         type: MovieCategory,
         page: Int,
@@ -220,6 +221,16 @@ class MovieRepositoryImpl(
             try {
                 val response = api.getSeasonOverview(movieId = movieId)
                 Result.Success(response.items.map { it.toSeason() })
+            } catch (e: IOException) {
+                Result.Error(DataError.Network.NO_INTERNET)
+            }
+        }
+
+    override suspend fun getRandomListMovie(): Result<List<Movie>, DataError.Network> =
+        withContext(Dispatchers.IO) {
+            try {
+                val listMovie = dao.pagingMovie().shuffled()
+                Result.Success(listMovie.map { it.toMovie() })
             } catch (e: IOException) {
                 Result.Error(DataError.Network.NO_INTERNET)
             }

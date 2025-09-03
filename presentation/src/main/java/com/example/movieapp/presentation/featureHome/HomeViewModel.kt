@@ -9,6 +9,7 @@ import com.example.movieapp.domain.resultLogic.Result
 import com.example.movieapp.presentation.util.ConnectivityObserver
 import com.example.movieapp.presentation.util.NavigationChannel
 import com.example.movieapp.presentation.util.NavigationEvent
+import com.example.movieapp.presentation.util.asErrorUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -49,15 +50,10 @@ class HomeViewModel(
             movieRepository.getCollection(type = movieCategory, 1).collect{ result ->
                 when (result) {
                     is Result.Error -> {
-                        val errorMessage =
-                            when (result.error) {
-                                DataError.Network.NO_INTERNET -> "Отсутсвует интернет"
-                                DataError.Network.SERVER_ERROR -> "Ошибка сервера"
-                            }
                         _state.value =
                             _state.value.copy(
                                 loading = false,
-                                error = errorMessage,
+                                error = result.asErrorUiText(),
                             )
                     }
 

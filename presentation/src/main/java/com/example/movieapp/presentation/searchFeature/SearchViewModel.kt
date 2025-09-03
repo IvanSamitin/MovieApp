@@ -10,9 +10,12 @@ import com.example.movieapp.domain.resultLogic.Result
 import com.example.movieapp.presentation.util.NavigationChannel
 import com.example.movieapp.presentation.util.NavigationEvent
 import com.example.movieapp.presentation.util.NavigationEvent.*
+import com.example.movieapp.presentation.util.UiText
+import com.example.movieapp.presentation.util.asErrorUiText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.String
@@ -20,15 +23,36 @@ import kotlin.String
 class SearchViewModel(
     private val movieRepository: MovieRepository,
 ) : ViewModel() {
-
+    private var hasLoadedInitialData = false
     private val _state = MutableStateFlow(SearchState())
     val state = _state
+        .onStart {
+            if (!hasLoadedInitialData) {
+                getRandomMovie()
+                hasLoadedInitialData = true
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = SearchState()
         )
 
+    private fun getRandomMovie() {
+        viewModelScope.launch {
+            val data = movieRepository.getRandomListMovie()
+            when(data){
+                is Result.Error -> {
+
+                }
+                is Result.Success -> {
+                    _state.value = _state.value.copy(
+                        listMovie = data.data.filter { it.nameRu != null }
+                    )
+                }
+            }
+        }
+    }
 
     private fun searchMovie() {
         viewModelScope.launch {
@@ -48,28 +72,27 @@ class SearchViewModel(
                 keyword = _state.value.searchText.trim(),
                 ratingFrom = state.value.sliderState.start,
                 ratingTo = state.value.sliderState.endInclusive,
-                order = if (state.value.orderMenuValue.isNotBlank()) {
-                    Order.valueOf(state.value.orderMenuValue)
-                } else null,
-                type = if (state.value.typeMenuValue.isNotBlank()) Type.valueOf(state.value.typeMenuValue) else null
+                order = state.value.orderMenuValue,
+                type = state.value.typeMenuValue,
+
             )
             when (result) {
                 is Result.Success -> {
                     _state.value = _state.value.copy(
                         listMovie = result.data.filter { it.nameRu != null },
                         loading = false,
-                        error = if (result.data.isEmpty()) "По запросу ничего не найдено" else ""
+                        isSearched = true,
+                        scrollToPosition = 0,
+                        error = if (result.data.isEmpty()) {
+                            UiText.DynamicString("По запросу ничего не найдено")
+                        } else null
                     )
                 }
 
                 is Result.Error -> {
-                    val errorMessage =
-                        when (result.error) {
-                            DataError.Network.NO_INTERNET -> "Отсутсвует интернет"
-                            DataError.Network.SERVER_ERROR -> "Ошибка сервера"
-                        }
                     _state.value = _state.value.copy(
-                        error = errorMessage
+                        isSearched = true,
+                        error = result.asErrorUiText()
                     )
                 }
             }
@@ -95,7 +118,8 @@ class SearchViewModel(
             searchText = "",
             listMovie = emptyList(),
             loading = false,
-            error = "",
+            error = null,
+            isSearched = false,
             isInputTextError = false,
             searchErrorText = ""
         )
@@ -113,29 +137,41 @@ class SearchViewModel(
         )
     }
 
-    private fun updateType(type: String) {
+    private fun updateType(type: Type) {
         _state.value = state.value.copy(
             typeMenuValue = type
         )
     }
 
-    private fun updateOrder(order: String) {
+    private fun updateOrder(order: Order) {
         _state.value = state.value.copy(
             orderMenuValue = order
         )
     }
 
+    private fun handleBackGesture(){
+        viewModelScope.launch {
+            _state.value = SearchState(scrollToPosition = 0)
+            getRandomMovie()
+        }
+    }
+
+     private fun onScrollCompleted() {
+        _state.value = _state.value.copy(scrollToPosition = null)
+    }
 
     fun onAction(action: SearchAction) {
         when (action) {
             is SearchAction.OnSearchTextChange -> onSearchTextChange(action.text)
             is SearchAction.OnSearchClick -> searchMovie()
             is SearchAction.OnItemClick -> sendNavigateEvent(OnItemClick(action.id))
-            is SearchAction.OnError -> onErrorAction()
+            is SearchAction.OnError -> handleBackGesture()
             is SearchAction.ShowFilters -> updateDialog()
             is SearchAction.OnSliderChange -> updateSlider(action.sliderState)
             is SearchAction.OnOrderChange -> updateOrder(action.orderMenuValue)
             is SearchAction.OnTypeChange -> updateType(action.typeMenuValue)
+            is SearchAction.BackHandler -> handleBackGesture()
+            is SearchAction.OnScrollCompleted -> onScrollCompleted()
         }
     }
 }

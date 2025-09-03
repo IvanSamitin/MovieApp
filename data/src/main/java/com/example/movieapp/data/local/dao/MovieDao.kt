@@ -56,8 +56,8 @@ interface MovieDao {
 //    @Query("DELETE FROM movieentity WHERE kinopoiskid IN(:ids)")
 //    suspend fun deleteMovie(ids: List<Int>)
 
-    @Query("SELECT * FROM movieentity")
-    fun pagingMovie(): PagingSource<Int, MovieEntity>
+    @Query("SELECT * FROM movieentity LIMIT 30")
+    fun pagingMovie(): List<MovieEntity>
 
     @Query("DELETE FROM movieentity")
     suspend fun clearAll()

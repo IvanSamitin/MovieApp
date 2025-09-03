@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,7 +13,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,22 +49,39 @@ fun SeasonOverviewRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeasonOverviewScreen(
     state: SeasonOverviewState,
     onAction: (SeasonOverviewAction) -> Unit,
 ) {
-    when {
-        state.loading -> LoadingIndicator()
-        state.error.isNotBlank() -> ErrorState(
-            onClick = { onAction(SeasonOverviewAction.Retry) },
-            errorText = state.error
+    Column {
+        CenterAlignedTopAppBar(
+            title = {
+                Text("Сезоны и серии")
+            },
+            navigationIcon = {
+                IconButton(onClick = { onAction(SeasonOverviewAction.NavigateBack) }) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                }
+            },
+            windowInsets = WindowInsets(top = 0.dp)
         )
+        when {
+            state.loading -> LoadingIndicator()
+            state.error != null -> ErrorState(
+                onClick = { onAction(SeasonOverviewAction.Retry) },
+                errorText = state.error.asString()
+            )
 
-        state.season.isNotEmpty() -> SeasonList(state = state, onAction = onAction)
-        else -> {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Text(text = "Информация не найдена", modifier = Modifier.align(Alignment.Center))
+            state.season.isNotEmpty() -> SeasonList(state = state, onAction = onAction)
+            else -> {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = "Информация не найдена",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
         }
     }
@@ -78,7 +98,7 @@ private fun SeasonList(
     ) {
         state.season.forEach { season ->
             stickyHeader {
-                Header(text = "${season.number} сезон", onAction = onAction)
+                Header(text = "${season.number} сезон")
             }
             items(season.episodes) { episode ->
                 ListItem(
@@ -111,19 +131,14 @@ private fun SeasonList(
 private fun Header(
     modifier: Modifier = Modifier,
     text: String,
-    onAction: (SeasonOverviewAction) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.secondaryContainer)
-            .padding(2.dp)
-
+            .padding(12.dp)
     ) {
-        IconButton(onClick = { onAction(SeasonOverviewAction.NavigateBack) }) {
-            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-        }
         Text(
             text = text,
             fontSize = 20.sp,
@@ -135,7 +150,7 @@ private fun Header(
 @Preview
 @Composable
 fun HeaderPreview() {
-    Header(text = "1", onAction = {})
+    Header(text = "1")
 }
 
 @Preview

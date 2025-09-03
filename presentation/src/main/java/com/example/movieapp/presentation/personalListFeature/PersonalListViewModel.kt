@@ -8,6 +8,7 @@ import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
 import com.example.movieapp.presentation.util.NavigationChannel
 import com.example.movieapp.presentation.util.NavigationEvent
+import com.example.movieapp.presentation.util.asErrorUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -40,11 +41,7 @@ class PersonalListViewModel(
             movieRepository.getCollection(type = movieCategory, 1).collect { result ->
                 when (result) {
                     is Result.Error -> {
-                        val errorMessage =
-                            when (result.error) {
-                                DataError.Network.NO_INTERNET -> "Отсутсвует интернет"
-                                DataError.Network.SERVER_ERROR -> "Ошибка сервера"
-                            }
+                        val errorMessage = result.asErrorUiText()
                     }
 
                     is Result.Success -> {

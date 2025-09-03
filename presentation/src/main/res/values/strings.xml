@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="order_raiting">Рейтингу</string>
+    <string name="order_num_voute">По колличеству оценок</string>
+    <string name="order_year">По году выхода</string>
+    <string name="type_film">Фильм</string>
+    <string name="type_video">Видео</string>
+    <string name="type_tv_series">Тв-сериал</string>
+    <string name="type_mini_series">Мини-сериал</string>
+    <string name="type_tv_show">ТВ-шоу</string>
+
+    <string name="no_internet_error">Нету интернета</string>
+
+    <string name="server_error">Ошибка сервера</string>
+
+    <string name="top_popular_all">Топ самых популярных</string>
+    <string name="top_250_movies">Топ 250 фильмов</string>
+    <string name="top_250_tv_shows">Топ 250 тв-шоу</string>
+    <string name="comics_theme">Топ лучших по комиксам</string>
+    <string name="search_history">История поиска</string>
+    <string name="favorite">Любимое</string>
+</resources>

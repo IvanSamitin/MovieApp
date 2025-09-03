@@ -12,23 +12,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.movieapp.domain.model.Order
+import com.example.movieapp.domain.model.Type
+import com.example.movieapp.presentation.util.asUiText
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownMenuSeacrh(
-    modifier: Modifier = Modifier,
-    list: List<String>,
-    label: String,
-    placeholder: String,
-    onClick: (String) -> Unit,
+fun <T :Enum<T>> DropDownMenuSeacrh(
+    list: List<T>,
+    label: String? = null,
+    placeholder: String? = null,
+    text: String?,
+    onClick: (T) -> Unit,
 ) {
     var isExpanded by remember {
         mutableStateOf(false)
-    }
-
-    var text by remember {
-        mutableStateOf("")
     }
 
     ExposedDropdownMenuBox(
@@ -37,13 +36,17 @@ fun DropDownMenuSeacrh(
     ) {
         OutlinedTextField(
             modifier = Modifier.menuAnchor(),
-            value = text,
+            value = text ?: "",
             onValueChange = { },
             placeholder = {
-                Text(text = placeholder)
+                placeholder?.let {
+                    Text(text = it)
+                }
             },
             label = {
-                Text(text = label)
+                label?.let {
+                    Text(text = it)
+                }
             },
             readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) }
@@ -55,13 +58,19 @@ fun DropDownMenuSeacrh(
             list.forEachIndexed { index, type ->
                 DropdownMenuItem(
                     text = {
-                        Text(text = type)
+                        when(type){
+                            is Order ->{
+                                Text(text = type.asUiText().asString())
+                            }
+                            is Type ->{
+                                Text(text = type.asUiText().asString())
+                            }
+                        }
                     },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                     onClick = {
-                        text = list[index]
-                        isExpanded = false
                         onClick(list[index])
+                        isExpanded = false
                     },
                 )
             }

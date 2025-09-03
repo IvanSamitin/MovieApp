@@ -3,6 +3,7 @@ package com.example.movieapp.presentation.featureHome
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.ArrowForward
@@ -28,8 +31,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.carousel.CarouselState
 import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
 import androidx.compose.runtime.Composable
@@ -41,17 +47,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import com.example.movieapp.R
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.presentation.ui.theme.MovieAppTheme
+import com.example.movieapp.presentation.ui.uiComponents.ErrorState
 import com.example.movieapp.presentation.ui.uiComponents.LoadingIndicator
 import org.koin.androidx.compose.koinViewModel
 import kotlin.collections.List
@@ -69,6 +80,7 @@ fun HomeRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     state: HomeState,
@@ -76,73 +88,72 @@ fun HomeScreen(
 ) {
     val scrollState = rememberScrollState()
 
-    when {
-        state.loading -> {
-            LoadingIndicator()
-        }
-
-        state.error != null -> {
-            ErrorStateHome(modifier = Modifier.padding(), onAction = onAction, state.error)
-        }
-
-        state.movieCollection.isNotEmpty() -> {
-            Column(
+    Column {
+        AnimatedVisibility(!state.isConnected) {
+            Box(
                 modifier = Modifier
-                    .verticalScroll(scrollState)
-                    .fillMaxSize()
-
+                    .background(color = MaterialTheme.colorScheme.error)
+                    .fillMaxWidth()
+                    .padding(6.dp)
             ) {
-                AnimatedVisibility(!state.isConnected) {
-                    Box(modifier = Modifier.background(color = MaterialTheme.colorScheme.error).fillMaxWidth().padding(6.dp)) {
-                        Text(text = "Нет интернета", modifier = Modifier.align(Alignment.Center), style = MaterialTheme.typography.titleLarge)
-                    }
-                }
-                PopularNow(
-                    listMovie = state.movieCollection[MovieCategory.TOP_POPULAR_ALL]
-                        ?: emptyList(),
-                    onAction = onAction,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                HorizontalDivider(Modifier.padding(top = 12.dp))
-                RowList(
-                    listMovie = state.movieCollection[MovieCategory.TOP_250_MOVIES]
-                        ?: emptyList(),
-                    listDescription = "250 лучших фильмов кинопоиска.",
-                    onAction = onAction,
-                    movieCategory = MovieCategory.TOP_250_MOVIES,
-                )
-                RowList(
-                    listMovie = state.movieCollection[MovieCategory.TOP_250_TV_SHOWS]
-                        ?: emptyList(),
-                    listDescription = "250 лучших сериалов кинопоиска.",
-                    onAction = onAction,
-                    movieCategory = MovieCategory.TOP_250_TV_SHOWS,
-                )
-                RowList(
-                    listMovie = state.movieCollection[MovieCategory.COMICS_THEME]
-                        ?: emptyList(),
-                    listDescription = "Лучшие фильмы по комиксам.",
-                    onAction = onAction,
-                    movieCategory = MovieCategory.COMICS_THEME,
+                Text(
+                    text = "Нет интернета",
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
         }
-    }
-}
+        when {
+            state.loading -> {
+                LoadingIndicator()
+            }
 
-@Composable
-private fun ErrorStateHome(
-    modifier: Modifier = Modifier,
-    onAction: (HomeAction) -> Unit,
-    errorText: String,
-) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Ошибка $errorText")
-            Button(onClick = { onAction(HomeAction.Refresh) }) {
-                Text(text = "Обновить")
+            state.error != null -> {
+                ErrorState(
+                    onClick = { onAction(HomeAction.Refresh) },
+                    errorText = state.error.asString()
+                )
+            }
+
+            state.movieCollection.isNotEmpty() -> {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(scrollState)
+                        .fillMaxSize()
+
+                ) {
+                    PopularNow(
+                        listMovie = state.movieCollection[MovieCategory.TOP_POPULAR_ALL]
+                            ?: emptyList(),
+                        onAction = onAction,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    HorizontalDivider(Modifier.padding(top = 12.dp))
+                    RowList(
+                        listMovie = state.movieCollection[MovieCategory.TOP_250_MOVIES]
+                            ?: emptyList(),
+                        listDescription = "250 лучших фильмов кинопоиска.",
+                        onAction = onAction,
+                        movieCategory = MovieCategory.TOP_250_MOVIES,
+                    )
+                    RowList(
+                        listMovie = state.movieCollection[MovieCategory.TOP_250_TV_SHOWS]
+                            ?: emptyList(),
+                        listDescription = "250 лучших сериалов кинопоиска.",
+                        onAction = onAction,
+                        movieCategory = MovieCategory.TOP_250_TV_SHOWS,
+                    )
+                    RowList(
+                        listMovie = state.movieCollection[MovieCategory.COMICS_THEME]
+                            ?: emptyList(),
+                        listDescription = "Лучшие фильмы по комиксам.",
+                        onAction = onAction,
+                        movieCategory = MovieCategory.COMICS_THEME,
+                    )
+                }
             }
         }
+
     }
 }
 
@@ -160,11 +171,26 @@ private fun PopularNow(
             currentItem = 0
         )
     }
+
+    val localStyle = MaterialTheme.colorScheme.onBackground
+
     Column(modifier = modifier) {
-        Text(
+        BasicText(
             text = "Самые популярные фильмы",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(horizontal = 8.dp)
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 12.sp,
+                maxFontSize = 40.sp
+            ),
+            maxLines = 1,
+            style = MaterialTheme.typography.headlineMedium.copy(
+                textAlign = TextAlign.Center
+            ),
+            color = ColorProducer {
+                localStyle
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
         )
         HorizontalUncontainedCarousel(
             state = carouselState,
@@ -289,8 +315,8 @@ private fun RowMovieCard(
                             .Builder(LocalContext.current)
                             .data(movieItem.posterUrlPreview)
                             .crossfade(true)
-                            .placeholder(com.example.movieapp.R.drawable.loading_placeholder)
-                            .error(com.example.movieapp.R.drawable.error_placeholder)
+                            .placeholder(R.drawable.loading_placeholder)
+                            .error(R.drawable.error_placeholder)
                             .memoryCachePolicy(CachePolicy.ENABLED)
                             .diskCachePolicy(CachePolicy.ENABLED)
                             .build(),

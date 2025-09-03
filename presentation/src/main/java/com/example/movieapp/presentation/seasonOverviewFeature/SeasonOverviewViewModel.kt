@@ -7,6 +7,8 @@ import com.example.movieapp.domain.resultLogic.DataError
 import com.example.movieapp.domain.resultLogic.Result
 import com.example.movieapp.presentation.util.NavigationChannel
 import com.example.movieapp.presentation.util.NavigationEvent
+import com.example.movieapp.presentation.util.asErrorUiText
+import com.example.movieapp.presentation.util.asUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -45,15 +47,12 @@ class SeasonOverviewViewModel(
                 is Result.Error -> {
                     _state.value = state.value.copy(
                         loading = false,
-                        error = when (response.error) {
-                            DataError.Network.NO_INTERNET -> "Нет интернета"
-                            DataError.Network.SERVER_ERROR -> "Ошибка сервера"
-                        }
+                        error = response.asErrorUiText()
                     )
                 }
 
                 is Result.Success -> _state.value =
-                    state.value.copy(season = response.data, loading = false, error = "")
+                    state.value.copy(season = response.data, loading = false, error = null)
             }
         }
     }

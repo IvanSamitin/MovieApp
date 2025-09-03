@@ -3,6 +3,7 @@ package com.example.movieapp.app.navigation
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -19,17 +20,18 @@ import com.example.movieapp.presentation.featureMovieList.MovieListViewModel
 import com.example.movieapp.presentation.personalListFeature.PersonalListRoot
 import com.example.movieapp.presentation.searchFeature.SearchRoot
 import com.example.movieapp.presentation.seasonOverviewFeature.SeasonOverviewRoot
-import com.example.movieapp.presentation.seasonOverviewFeature.SeasonOverviewScreen
 import com.example.movieapp.presentation.seasonOverviewFeature.SeasonOverviewViewModel
 import com.example.movieapp.presentation.util.NavigationChannel
 import com.example.movieapp.presentation.util.NavigationEvent
+import com.example.movieapp.presentation.util.UiText
+import com.example.movieapp.presentation.util.asUiText
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
 fun NavHostContainer(
     navController: NavHostController,
-    padding: PaddingValues
+    padding: PaddingValues,
 ) {
 
     NavHost(
@@ -56,17 +58,21 @@ fun HomeNavHost() {
     val homeNavController = rememberNavController()
     ObserveAsEvents(NavigationChannel.navigationEventsChannelFlow) { event ->
         when (event) {
-            is NavigationEvent.OnItemClick -> homeNavController.navigate(
-                MovieDetailsScreen(
-                    movieId = event.id
+            is NavigationEvent.OnItemClick -> {
+                homeNavController.navigate(
+                    MovieDetailsScreen(
+                        movieId = event.id
+                    )
                 )
-            )
+            }
 
-            is NavigationEvent.OnCategoryClick -> homeNavController.navigate(
-                MovieListScreen(
-                    category = event.category
+            is NavigationEvent.OnCategoryClick -> {
+                homeNavController.navigate(
+                    MovieListScreen(
+                        category = event.category
+                    )
                 )
-            )
+            }
 
             is NavigationEvent.OnNavigateBack -> homeNavController.navigateUp()
 
@@ -86,6 +92,7 @@ fun HomeNavHost() {
             MovieListRoot(
                 viewModel = viewModel
             )
+
         }
         composable<Screens.MovieDetailsScreen> {
             val args = it.toRoute<Screens.MovieDetailsScreen>()
@@ -97,7 +104,7 @@ fun HomeNavHost() {
         composable<Screens.SeasonOverviewScreen> {
             val args = it.toRoute<Screens.SeasonOverviewScreen>()
             val viewModel: SeasonOverviewViewModel =
-                koinViewModel<SeasonOverviewViewModel>(parameters = { parametersOf(args.movieId) })
+                koinViewModel<SeasonOverviewViewModel>(parameters = { parametersOf(args.movieId, ) })
             SeasonOverviewRoot(viewModel)
         }
     }
@@ -136,6 +143,7 @@ fun SearchNavHost() {
             val viewModel: MovieDetailsViewModel =
                 koinViewModel<MovieDetailsViewModel>(parameters = { parametersOf(args.movieId) })
             MovieDetailsRoot(viewModel)
+
         }
         composable<Screens.SeasonOverviewScreen> {
             val args = it.toRoute<Screens.SeasonOverviewScreen>()
@@ -179,12 +187,14 @@ fun FavNavHost() {
             val viewModel: MovieDetailsViewModel =
                 koinViewModel<MovieDetailsViewModel>(parameters = { parametersOf(args.movieId) })
             MovieDetailsRoot(viewModel)
+
         }
         composable<Screens.SeasonOverviewScreen> {
             val args = it.toRoute<Screens.SeasonOverviewScreen>()
             val viewModel: SeasonOverviewViewModel =
                 koinViewModel<SeasonOverviewViewModel>(parameters = { parametersOf(args.movieId) })
             SeasonOverviewRoot(viewModel)
+
         }
     }
 }
