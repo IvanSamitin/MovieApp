@@ -25,6 +25,7 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.movieapp.domain.model.Movie
+import com.example.movieapp.presentation.util.getRatingColor
 
 @Composable
 fun MovieListCard(
@@ -72,7 +73,7 @@ fun MovieListCard(
                             Modifier
                                 .offset(10.dp, 11.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(color = Color.Green)
+                                .background(color = getRatingColor(rating.toInt()))
                                 .size(21.dp, 17.dp),
                     ) {
                         Text(

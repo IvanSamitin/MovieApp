@@ -27,7 +27,7 @@ class MovieApp : Application(), KoinComponent {
 
     private fun setupPeriodicSync() {
         val workRequest = PeriodicWorkRequestBuilder<MovieSyncWorker>(
-            1, TimeUnit.DAYS
+            12, TimeUnit.HOURS
         )
 //            .setConstraints(
 //                Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()

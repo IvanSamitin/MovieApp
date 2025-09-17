@@ -32,7 +32,7 @@ val dataModule = module {
     single {
         val interceptor =
             HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY // Логировать запросы/ответы
+                level = HttpLoggingInterceptor.Level.BODY
             }
         val apiKey = BuildConfig.API_KEY
 

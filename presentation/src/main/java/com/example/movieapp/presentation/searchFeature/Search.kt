@@ -1,22 +1,14 @@
 package com.example.movieapp.presentation.searchFeature
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,50 +18,33 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.Order
 import com.example.movieapp.domain.model.Type
 import com.example.movieapp.presentation.ui.theme.MovieAppTheme
-import com.example.movieapp.presentation.ui.theme.Typography
 import com.example.movieapp.presentation.ui.uiComponents.DialogBox
 import com.example.movieapp.presentation.ui.uiComponents.DropDownMenuSeacrh
 import com.example.movieapp.presentation.ui.uiComponents.ErrorState
 import com.example.movieapp.presentation.ui.uiComponents.LoadingIndicator
 import com.example.movieapp.presentation.ui.uiComponents.MovieList
-import com.example.movieapp.presentation.ui.uiComponents.MovieListCard
 import com.example.movieapp.presentation.util.asUiText
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -78,11 +53,11 @@ fun SearchRoot(
     viewModel: SearchViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
+    val search by viewModel.searchText.collectAsStateWithLifecycle()
     SearchScreen(
         state = state,
+        search = search,
         onAction = viewModel::onAction
-
     )
 }
 
@@ -90,10 +65,10 @@ fun SearchRoot(
 @Composable
 fun SearchScreen(
     state: SearchState,
+    search: String,
     onAction: (SearchAction) -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
-
 
     Column(
         modifier = Modifier
@@ -116,6 +91,7 @@ fun SearchScreen(
                 .fillMaxWidth()
                 .background(color = MaterialTheme.colorScheme.background),
             state = state,
+            search = search,
             onAction = onAction,
         )
         when {
@@ -125,7 +101,6 @@ fun SearchScreen(
                     onClick = { onAction(SearchAction.OnError) },
                     state.error.asString()
                 )
-
             }
 
             state.loading -> {
@@ -160,7 +135,6 @@ fun SearchScreen(
                             label = "Сортировка",
                             text = state.orderMenuValue?.asUiText()?.asString()
                         ) {
-
                             onAction(SearchAction.OnOrderChange(it))
                         }
                         Spacer(Modifier.height(12.dp))
@@ -204,7 +178,6 @@ fun SearchScreen(
                 }
             }
         }
-
     }
 }
 
@@ -212,12 +185,13 @@ fun SearchScreen(
 fun SearchBar(
     modifier: Modifier = Modifier,
     state: SearchState,
+    search: String,
     onAction: (SearchAction) -> Unit,
 ) {
 
     val focusManager = LocalFocusManager.current
     OutlinedTextField(
-        value = state.searchText,
+        value = search,
         onValueChange = { onAction(SearchAction.OnSearchTextChange(it)) },
         placeholder = { Text(text = "Поиск") },
         trailingIcon = {
@@ -239,7 +213,6 @@ fun SearchBar(
                     Icon(imageVector = Icons.Default.Search, contentDescription = null)
                 }
             }
-
         },
         supportingText = {
             AnimatedVisibility(visible = state.isInputTextError) {
@@ -257,17 +230,18 @@ fun SearchBar(
         ),
         isError = state.isInputTextError,
         singleLine = true,
-        modifier = modifier
+        modifier = modifier.padding(horizontal = 8.dp)
     )
 }
 
-@Preview
-@Composable
-private fun Preview() {
-    MovieAppTheme {
-        SearchScreen(
-            state = SearchState(),
-            onAction = {}
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun Preview() {
+//    MovieAppTheme {
+//        SearchScreen(
+//            state = SearchState(),
+//
+//            onAction = {}
+//        )
+//    }
+//}

@@ -1,5 +1,7 @@
 package com.example.movieapp.presentation.featureMovieDetail
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.presentation.util.UiText
 

@@ -51,10 +51,11 @@ enum class ProductionStatus {
     POST_PRODUCTION,
 }
 
-enum class Type {
+enum class Type{
     FILM,
     VIDEO,
     TV_SERIES,
     MINI_SERIES,
-    TV_SHOW,
+    TV_SHOW;
+
 }

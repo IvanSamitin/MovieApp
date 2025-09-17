@@ -1,10 +1,13 @@
 package com.example.movieapp.app.navigation
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,14 +34,19 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun NavHostContainer(
     navController: NavHostController,
-    padding: PaddingValues,
+    padding: PaddingValues
+
 ) {
 
     NavHost(
         navController = navController,
         startDestination = "Home",
         modifier = Modifier
-            .padding(padding)
+            .padding(
+                top = padding.calculateTopPadding(),
+                start = padding.calculateStartPadding(LocalLayoutDirection.current),
+                end = padding.calculateEndPadding(LocalLayoutDirection.current)
+            )
 
     ) {
         composable("Home") {
@@ -104,7 +112,7 @@ fun HomeNavHost() {
         composable<Screens.SeasonOverviewScreen> {
             val args = it.toRoute<Screens.SeasonOverviewScreen>()
             val viewModel: SeasonOverviewViewModel =
-                koinViewModel<SeasonOverviewViewModel>(parameters = { parametersOf(args.movieId, ) })
+                koinViewModel<SeasonOverviewViewModel>(parameters = { parametersOf(args.movieId) })
             SeasonOverviewRoot(viewModel)
         }
     }

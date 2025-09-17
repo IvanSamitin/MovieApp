@@ -37,7 +37,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.carousel.CarouselState
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
 import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorProducer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,6 +67,7 @@ import com.example.movieapp.domain.model.MovieCategory
 import com.example.movieapp.presentation.ui.theme.MovieAppTheme
 import com.example.movieapp.presentation.ui.uiComponents.ErrorState
 import com.example.movieapp.presentation.ui.uiComponents.LoadingIndicator
+import com.example.movieapp.presentation.util.getRatingColor
 import org.koin.androidx.compose.koinViewModel
 import kotlin.collections.List
 
@@ -165,12 +169,11 @@ private fun PopularNow(
     onAction: (HomeAction) -> Unit,
 ) {
 
-    val carouselState = remember(listMovie.size) {
-        CarouselState(
-            itemCount = { listMovie.size },
-            currentItem = 0
-        )
-    }
+
+    val carouselState = rememberCarouselState { listMovie.count() }
+
+
+    carouselState.itemCountState
 
     val localStyle = MaterialTheme.colorScheme.onBackground
 
@@ -192,15 +195,24 @@ private fun PopularNow(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 4.dp)
         )
-        HorizontalUncontainedCarousel(
+        HorizontalMultiBrowseCarousel(
             state = carouselState,
-            itemWidth = 235.dp,
-            itemSpacing = 4.dp,
+            preferredItemWidth = 230.dp,
+            itemSpacing = 8.dp,
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) { movie ->
             val item = listMovie[movie]
             CarouselItem(movieItem = item, onAction = onAction)
         }
+//        HorizontalUncontainedCarousel(
+//            state = carouselState,
+//            itemWidth = 233.dp,
+//            itemSpacing = 8.dp,
+//            contentPadding = PaddingValues(horizontal = 8.dp)
+//        ) { movie ->
+//            val item = listMovie[movie]
+//            CarouselItem(movieItem = item, onAction = onAction)
+//        }
     }
 }
 
@@ -210,9 +222,15 @@ private fun CarouselItem(
     movieItem: Movie,
     onAction: (HomeAction) -> Unit,
 ) {
-    Card(modifier = modifier.clickable {
-        movieItem.kinopoiskId?.let { onAction(HomeAction.ItemClickAction(it)) }
-    }) {
+    Card(
+        modifier = modifier
+            .clickable {
+                movieItem.kinopoiskId?.let { onAction(HomeAction.ItemClickAction(it)) }
+            }
+            .clip(
+                RoundedCornerShape(12.dp),
+            ),
+    ) {
         AsyncImage(
             model =
                 ImageRequest
@@ -222,6 +240,7 @@ private fun CarouselItem(
                     .memoryCachePolicy(CachePolicy.ENABLED)
                     .diskCachePolicy(CachePolicy.ENABLED)
                     .build(),
+            contentScale = ContentScale.Crop,
             contentDescription = null,
             modifier =
                 Modifier
@@ -328,20 +347,22 @@ private fun RowMovieCard(
                                 RoundedCornerShape(8.dp),
                             ),
                 )
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier =
-                        Modifier
-                            .offset(10.dp, 11.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(color = Color.Green)
-                            .size(21.dp, 17.dp),
-                ) {
-                    Text(
-                        text = movieItem.ratingKinopoisk.toString(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
-                    )
+                movieItem.ratingKinopoisk?.let { rating ->
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier =
+                            Modifier
+                                .offset(10.dp, 11.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(getRatingColor(rating.toInt()))
+                                .size(21.dp, 17.dp),
+                    ) {
+                        Text(
+                            text = rating.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                        )
+                    }
                 }
             }
             Text(

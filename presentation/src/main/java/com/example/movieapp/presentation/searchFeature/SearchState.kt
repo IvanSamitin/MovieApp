@@ -1,13 +1,14 @@
 package com.example.movieapp.presentation.searchFeature
 
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.Immutable
 import com.example.movieapp.domain.model.Movie
 import com.example.movieapp.domain.model.Order
 import com.example.movieapp.domain.model.Type
 import com.example.movieapp.presentation.util.UiText
 
+@Immutable
 data class SearchState(
-    val searchText: String = "",
     val listMovie: List<Movie> = emptyList(),
     val loading: Boolean = false,
     val error: UiText? = null,

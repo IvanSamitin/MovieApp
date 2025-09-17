@@ -12,9 +12,16 @@ import com.example.movieapp.presentation.util.NavigationEvent
 import com.example.movieapp.presentation.util.NavigationEvent.*
 import com.example.movieapp.presentation.util.UiText
 import com.example.movieapp.presentation.util.asErrorUiText
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -29,6 +36,7 @@ class SearchViewModel(
         .onStart {
             if (!hasLoadedInitialData) {
                 getRandomMovie()
+                setupSearchDebounce()
                 hasLoadedInitialData = true
             }
         }
@@ -38,13 +46,30 @@ class SearchViewModel(
             initialValue = SearchState()
         )
 
+    private val _searchText = MutableStateFlow("")
+    val searchText = _searchText.asStateFlow()
+
+    @OptIn(FlowPreview::class)
+    private fun setupSearchDebounce() {
+        viewModelScope.launch {
+            _searchText
+                .debounce(300)
+                .filter { it.trim().isNotEmpty() }
+                .distinctUntilChanged()
+                .collect { query ->
+                    searchMovie(query)
+                }
+        }
+    }
+
     private fun getRandomMovie() {
         viewModelScope.launch {
             val data = movieRepository.getRandomListMovie()
-            when(data){
+            when (data) {
                 is Result.Error -> {
 
                 }
+
                 is Result.Success -> {
                     _state.value = _state.value.copy(
                         listMovie = data.data.filter { it.nameRu != null }
@@ -54,9 +79,9 @@ class SearchViewModel(
         }
     }
 
-    private fun searchMovie() {
+    private fun searchMovie(text: String) {
         viewModelScope.launch {
-            if (_state.value.searchText.trim().isBlank()) {
+            if (text.trim().isBlank()) {
                 _state.value = _state.value.copy(
                     isInputTextError = true,
                     searchErrorText = "Поиск не может быт пустым"
@@ -69,12 +94,11 @@ class SearchViewModel(
                 searchErrorText = ""
             )
             val result = movieRepository.searchMovie(
-                keyword = _state.value.searchText.trim(),
+                keyword = text.trim(),
                 ratingFrom = state.value.sliderState.start,
                 ratingTo = state.value.sliderState.endInclusive,
                 order = state.value.orderMenuValue,
                 type = state.value.typeMenuValue,
-
             )
             when (result) {
                 is Result.Success -> {
@@ -106,23 +130,7 @@ class SearchViewModel(
     }
 
     private fun onSearchTextChange(text: String) {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(
-                searchText = text
-            )
-        }
-    }
-
-    private fun onErrorAction() {
-        _state.value = _state.value.copy(
-            searchText = "",
-            listMovie = emptyList(),
-            loading = false,
-            error = null,
-            isSearched = false,
-            isInputTextError = false,
-            searchErrorText = ""
-        )
+        _searchText.value = text
     }
 
     private fun updateDialog() {
@@ -149,21 +157,22 @@ class SearchViewModel(
         )
     }
 
-    private fun handleBackGesture(){
+    private fun handleBackGesture() {
         viewModelScope.launch {
             _state.value = SearchState(scrollToPosition = 0)
+            _searchText.value = ""
             getRandomMovie()
         }
     }
 
-     private fun onScrollCompleted() {
+    private fun onScrollCompleted() {
         _state.value = _state.value.copy(scrollToPosition = null)
     }
 
     fun onAction(action: SearchAction) {
         when (action) {
             is SearchAction.OnSearchTextChange -> onSearchTextChange(action.text)
-            is SearchAction.OnSearchClick -> searchMovie()
+            is SearchAction.OnSearchClick -> searchMovie(_searchText.value)
             is SearchAction.OnItemClick -> sendNavigateEvent(OnItemClick(action.id))
             is SearchAction.OnError -> handleBackGesture()
             is SearchAction.ShowFilters -> updateDialog()
@@ -175,4 +184,3 @@ class SearchViewModel(
         }
     }
 }
-
